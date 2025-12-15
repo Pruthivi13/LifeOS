@@ -1,7 +1,8 @@
 import { Resend } from 'resend';
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with API key if available
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 interface EmailOptions {
     to: string;
@@ -10,12 +11,22 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'LifeOS <onboarding@resend.dev>',
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-    });
+    if (!resend) {
+        console.warn('⚠️ RESEND_API_KEY is missing. Email sending is disabled.');
+        return;
+    }
+
+    try {
+        await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || 'LifeOS <onboarding@resend.dev>',
+            to: options.to,
+            subject: options.subject,
+            html: options.html,
+        });
+    } catch (error) {
+        console.error('Failed to send email:', error);
+        throw error;
+    }
 };
 
 export const sendOTPEmail = async (email: string, otp: string): Promise<void> => {

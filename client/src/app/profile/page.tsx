@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useTheme } from '@/context';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Header, DashboardLayout } from '@/components/layout';
 import { Card, Input, Button, Avatar } from '@/components/ui';
 import { Camera, Save, ArrowLeft, LogOut } from 'lucide-react';

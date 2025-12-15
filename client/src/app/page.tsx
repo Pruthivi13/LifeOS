@@ -15,7 +15,8 @@ import {
   AddHabitModal,
   EditHabitModal
 } from '@/components/features';
-import { useTheme, useAuth } from '@/context';
+import { useTheme } from '@/context/ThemeContext';
+import { useAuth } from '@/context/AuthContext';
 import { Task, Habit, MoodEntry } from '@/types';
 import { getMoodLabel, weeklyInsight } from '@/lib/mockData';
 

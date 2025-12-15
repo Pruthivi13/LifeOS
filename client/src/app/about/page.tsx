@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { Button, Card } from '@/components/ui';
 import { Header, DashboardLayout } from '@/components/layout';
-import { useAuth, useTheme } from '@/context';
+import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { ArrowLeft, CheckCircle2, BarChart2, Smile, Zap, Droplets, Palette } from 'lucide-react';
 import {
     TasksCard,

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context';
+import { useAuth } from '@/context/AuthContext';
 import { Button, Input, Card } from '@/components/ui';
 import axios from 'axios';
 import { motion } from 'framer-motion';

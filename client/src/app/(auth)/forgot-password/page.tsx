@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 
 type Step = 'email' | 'otp' | 'success';
 
@@ -15,6 +16,8 @@ export default function ForgotPasswordPage() {
     const [otp, setOtp] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -136,26 +139,44 @@ export default function ForgotPasswordPage() {
 
                             <div>
                                 <label className="block text-sm font-medium mb-1.5 ml-1">New Password</label>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        type={showPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1.5 ml-1">Confirm Password</label>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
-                                    className="w-full"
-                                />
+                                <div className="relative">
+                                    <Input
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                        className="w-full pr-10"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    >
+                                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                             </div>
 
                             <Button type="submit" className="w-full" size="lg" disabled={loading}>

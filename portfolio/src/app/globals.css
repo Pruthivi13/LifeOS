@@ -1,0 +1,268 @@
+@import "tailwindcss";
+
+/* ===== LifeOS Design System ===== */
+
+:root {
+  /* Background Colors */
+  --background: #F8F9FA;
+  --background-secondary: #FFFFFF;
+  --foreground: #1A1A1A;
+  --foreground-muted: #6B7280;
+  
+  /* Primary Accent - Muted Lavender */
+  --primary: #9B8FD8;
+  --primary-light: #C4BBE8;
+  --primary-dark: #7B6BC8;
+  
+  /* Secondary Accents */
+  --sage-green: #8FBC8B;
+  --warm-amber: #E6B17E;
+  --soft-red: #E88B8B;
+  --soft-blue: #89B4D4;
+  
+  /* Mood Colors (Pastel) */
+  --mood-great: #A8E6CF;
+  --mood-good: #B8E0D2;
+  --mood-okay: #D5E5E5;
+  --mood-low: #E8D5D5;
+  --mood-bad: #E8C5C5;
+  
+  /* Card & Surface */
+  --card-background: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(0, 0, 0, 0.05);
+  --card-shadow: rgba(0, 0, 0, 0.04);
+  
+  /* Glass Effect */
+  --glass-blur: 12px;
+  --glass-opacity: 0.7;
+  
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0F0F0F;
+    --background-secondary: #1A1A1A;
+    --foreground: #EDEDED;
+    --foreground-muted: #9CA3AF;
+    
+    --card-background: rgba(30, 30, 30, 0.8);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-shadow: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Manual Light Mode Toggle Support */
+.light {
+  --background: #F8F9FA;
+  --background-secondary: #FFFFFF;
+  --foreground: #1A1A1A;
+  --foreground-muted: #6B7280;
+  
+  --card-background: rgba(255, 255, 255, 0.8);
+  --card-border: rgba(0, 0, 0, 0.05);
+  --card-shadow: rgba(0, 0, 0, 0.04);
+}
+
+/* Manual Dark Mode Toggle Support */
+.dark {
+  --background: #0F0F0F;
+  --background-secondary: #1A1A1A;
+  --foreground: #EDEDED;
+  --foreground-muted: #9CA3AF;
+  
+  --card-background: rgba(30, 30, 30, 0.8);
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: rgba(0, 0, 0, 0.2);
+}
+
+/* ===== Tailwind Theme Extension ===== */
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-sage: var(--sage-green);
+  --color-amber: var(--warm-amber);
+  --color-soft-red: var(--soft-red);
+  --color-soft-blue: var(--soft-blue);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+/* ===== Base Styles ===== */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Glassmorphism Card ===== */
+.glass-card {
+  background: var(--card-background);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px var(--card-shadow);
+}
+
+/* ===== Progress Ring ===== */
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.progress-ring__circle {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* ===== Custom Checkbox ===== */
+.custom-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--foreground-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.custom-checkbox:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ===== Habit Streak Bar ===== */
+.streak-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.streak-day {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.streak-day--completed {
+  background: var(--soft-blue);
+}
+
+.streak-day--missed {
+  background: var(--foreground-muted);
+  opacity: 0.3;
+}
+
+/* ===== Priority Tags ===== */
+.priority-tag {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priority-tag--high {
+  background: rgba(232, 139, 139, 0.2);
+  color: var(--soft-red);
+}
+
+.priority-tag--medium {
+  background: rgba(230, 177, 126, 0.2);
+  color: var(--warm-amber);
+}
+
+.priority-tag--low {
+  background: rgba(143, 188, 139, 0.2);
+  color: var(--sage-green);
+}
+
+/* ===== Smooth Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--foreground-muted);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0) rotate(45deg); }
+  50% { transform: scale(1.2) rotate(45deg); }
+  100% { transform: scale(1) rotate(45deg); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.2s ease forwards;
+}
+
+/* ===== Utility Classes ===== */
+.text-balance {
+  text-wrap: balance;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

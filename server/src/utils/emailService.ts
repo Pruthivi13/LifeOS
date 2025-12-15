@@ -1,14 +1,7 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: false,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+// Initialize SendGrid with API key
+sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
 interface EmailOptions {
     to: string;
@@ -17,14 +10,14 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    const mailOptions = {
-        from: `"LifeOS" <${process.env.EMAIL_USER}>`,
+    const msg = {
         to: options.to,
+        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@lifeos.app',
         subject: options.subject,
         html: options.html,
     };
 
-    await transporter.sendMail(mailOptions);
+    await sgMail.send(msg);
 };
 
 export const sendOTPEmail = async (email: string, otp: string): Promise<void> => {

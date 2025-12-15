@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
-import axios from 'axios';
+import api from '@/lib/api';
+import api from '@/lib/api';
 
 interface AuthContextType {
     user: User | null;
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const checkAuth = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/auth/me');
+            const res = await api.get('/api/auth/me');
             if (res.data) {
                 const normalizedUser: User = {
                     _id: res.data._id || res.data.id,

@@ -7,7 +7,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Header, DashboardLayout } from '@/components/layout';
 import { Card, Input, Button, Avatar } from '@/components/ui';
 import { Camera, Save, ArrowLeft, LogOut } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/api';
 
 export default function ProfilePage() {
     const { user, token, checkAuth, logout } = useAuth();
@@ -54,7 +54,7 @@ export default function ProfilePage() {
         }
 
         try {
-            const res = await axios.put('http://localhost:5000/api/auth/profile', formData, {
+            const res = await api.put('/api/auth/profile', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`,

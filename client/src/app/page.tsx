@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '@/lib/api';
 import { Header, DashboardLayout, DashboardGrid } from '@/components/layout';
 import {
   TasksCard,
@@ -55,9 +55,9 @@ export default function Home() {
     try {
       setLoading(true);
       const [tasksRes, habitsRes, moodsRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/tasks'),
-        axios.get('http://localhost:5000/api/habits'),
-        axios.get('http://localhost:5000/api/moods')
+        api.get('/api/tasks'),
+        api.get('/api/habits'),
+        api.get('/api/moods')
       ]);
 
       setTasks(tasksRes.data);
@@ -73,8 +73,8 @@ export default function Home() {
   const handleEditHabit = async (id: string, updates: Partial<Habit>) => {
     try {
       setModalLoading(true);
-      await axios.put(`http://localhost:5000/api/habits/${id}`, updates);
-      const res = await axios.get('http://localhost:5000/api/habits');
+      await api.put(`/api/habits/${id}`, updates);
+      const res = await api.get('/api/habits');
       setHabits(res.data);
       setActiveModal('none');
       setSelectedHabit(null);
@@ -88,8 +88,8 @@ export default function Home() {
   const handleDeleteHabit = async (id: string) => {
     try {
       setModalLoading(true);
-      await axios.delete(`http://localhost:5000/api/habits/${id}`);
-      const res = await axios.get('http://localhost:5000/api/habits');
+      await api.delete(`/api/habits/${id}`);
+      const res = await api.get('/api/habits');
       setHabits(res.data);
       setActiveModal('none');
       setSelectedHabit(null);
@@ -115,7 +115,7 @@ export default function Home() {
 
     try {
       const task = tasks[taskIndex];
-      await axios.put(`http://localhost:5000/api/tasks/${taskId}`, {
+      await api.put(`/api/tasks/${taskId}`, {
         completed: !task.completed
       });
     } catch (error) {
@@ -126,10 +126,10 @@ export default function Home() {
 
   const handleHabitComplete = async (habitId: string, date: Date) => {
     try {
-      await axios.put(`http://localhost:5000/api/habits/${habitId}/complete`, {
+      await api.put(`/api/habits/${habitId}/complete`, {
         date: date.toISOString()
       });
-      const res = await axios.get('http://localhost:5000/api/habits');
+      const res = await api.get('/api/habits');
       setHabits(res.data);
     } catch (error) {
       console.error('Failed to complete habit', error);
@@ -138,12 +138,12 @@ export default function Home() {
 
   const handleMoodSelect = async (mood: number) => {
     try {
-      await axios.post('http://localhost:5000/api/moods', {
+      await api.post('/api/moods', {
         mood,
         note: '',
         date: new Date()
       });
-      const res = await axios.get('http://localhost:5000/api/moods');
+      const res = await api.get('/api/moods');
       setMoods(res.data);
     } catch (error) {
       console.error('Failed to log mood', error);
@@ -153,8 +153,8 @@ export default function Home() {
   const handleAddTask = async (taskData: any) => {
     try {
       setModalLoading(true);
-      await axios.post('http://localhost:5000/api/tasks', taskData);
-      const res = await axios.get('http://localhost:5000/api/tasks');
+      await api.post('/api/tasks', taskData);
+      const res = await api.get('/api/tasks');
       setTasks(res.data);
       setActiveModal('none');
     } catch (error) {
@@ -167,8 +167,8 @@ export default function Home() {
   const handleAddHabit = async (habitData: any) => {
     try {
       setModalLoading(true);
-      await axios.post('http://localhost:5000/api/habits', habitData);
-      const res = await axios.get('http://localhost:5000/api/habits');
+      await api.post('/api/habits', habitData);
+      const res = await api.get('/api/habits');
       setHabits(res.data);
       setActiveModal('none');
     } catch (error) {

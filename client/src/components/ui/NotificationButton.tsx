@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, BellOff } from 'lucide-react';
-import axios from 'axios';
+import api from '@/lib/api';
 
 export function NotificationButton() {
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -35,7 +35,7 @@ export function NotificationButton() {
             await navigator.serviceWorker.ready;
 
             // Get VAPID public key from server
-            const { data } = await axios.get('http://localhost:5000/api/notifications/vapid-public-key');
+            const { data } = await api.get('/api/notifications/vapid-public-key');
 
             // Convert base64 to Uint8Array
             const urlBase64ToUint8Array = (base64String: string) => {
@@ -57,8 +57,8 @@ export function NotificationButton() {
 
             // Send subscription to server
             const token = localStorage.getItem('lifeos-token');
-            await axios.post(
-                'http://localhost:5000/api/notifications/subscribe',
+            await api.post(
+                '/api/notifications/subscribe',
                 subscription.toJSON(),
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -81,8 +81,8 @@ export function NotificationButton() {
                 await subscription.unsubscribe();
 
                 const token = localStorage.getItem('lifeos-token');
-                await axios.post(
-                    'http://localhost:5000/api/notifications/unsubscribe',
+                await api.post(
+                    '/api/notifications/unsubscribe',
                     { endpoint: subscription.endpoint },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );

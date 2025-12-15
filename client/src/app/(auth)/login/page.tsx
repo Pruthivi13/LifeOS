@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input, Card } from '@/components/ui';
-import axios from 'axios';
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', {
+            const res = await api.post('/api/auth/login', {
                 email,
                 password,
             });

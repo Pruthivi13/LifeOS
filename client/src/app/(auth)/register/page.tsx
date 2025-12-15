@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input } from '@/components/ui';
-import axios from 'axios';
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 
 export default function RegisterPage() {
@@ -23,7 +23,7 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/register', {
+            const res = await api.post('/api/auth/register', {
                 name,
                 email,
                 password,

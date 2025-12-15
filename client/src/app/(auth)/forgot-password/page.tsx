@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Input } from '@/components/ui';
-import axios from 'axios';
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/auth/forgot-password', { email });
+            await api.post('/api/auth/forgot-password', { email });
             setStep('otp');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to send OTP');
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
         setLoading(true);
 
         try {
-            await axios.post('http://localhost:5000/api/auth/reset-password', {
+            await api.post('/api/auth/reset-password', {
                 email,
                 otp,
                 password,

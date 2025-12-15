@@ -34,7 +34,7 @@ portfolio/
 git clone https://github.com/Pruthivi13/LifeOS.git
 
 # Navigate to project
-cd LifeOS/portfolio
+cd LifeOS/client
 
 # Install dependencies
 npm install

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import User from '../models/User';
+import { sendOTPEmail } from '../utils/emailService';
 
 // Generate JWT
 const generateToken = (id: string) => {
@@ -132,7 +133,7 @@ export const updateProfile = async (req: any, res: Response) => {
     }
 };
 
-// @desc    Forgot password - generate reset token
+// @desc    Forgot password - generate OTP and send email
 // @route   POST /api/auth/forgot-password
 // @access  Public
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
@@ -146,13 +147,13 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
             return;
         }
 
-        // Generate reset token
-        const resetToken = crypto.randomBytes(20).toString('hex');
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Hash token and set to resetPasswordToken field
-        user.resetPasswordToken = crypto
+        // Hash OTP before storing
+        user.resetOTP = crypto
             .createHash('sha256')
-            .update(resetToken)
+            .update(otp)
             .digest('hex');
 
         // Set expire to 10 minutes
@@ -160,44 +161,55 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
         await user.save();
 
-        // In production, you would send an email here
-        // For now, return the token in the response
-        res.json({
-            success: true,
-            message: 'Password reset token generated',
-            resetToken, // Remove this in production!
-            resetUrl: `http://localhost:3000/reset-password/${resetToken}`,
-        });
+        // Send OTP via email
+        try {
+            await sendOTPEmail(email, otp);
+            res.json({
+                success: true,
+                message: 'OTP sent to your email address',
+            });
+        } catch (emailError) {
+            // Clear OTP if email fails
+            user.resetOTP = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save();
+            res.status(500).json({ message: 'Failed to send email. Please try again.' });
+        }
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
 };
 
-// @desc    Reset password
-// @route   POST /api/auth/reset-password/:token
+// @desc    Reset password with OTP
+// @route   POST /api/auth/reset-password
 // @access  Public
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     try {
-        // Get hashed token
-        const resetPasswordToken = crypto
+        const { email, otp, password } = req.body;
+
+        if (!email || !otp || !password) {
+            res.status(400).json({ message: 'Email, OTP, and new password are required' });
+            return;
+        }
+
+        // Hash OTP to compare
+        const hashedOTP = crypto
             .createHash('sha256')
-            .update(req.params.token)
+            .update(otp)
             .digest('hex');
 
         const user = await User.findOne({
-            resetPasswordToken,
+            email,
+            resetOTP: hashedOTP,
             resetPasswordExpire: { $gt: Date.now() },
         });
 
         if (!user) {
-            res.status(400).json({ message: 'Invalid or expired reset token' });
+            res.status(400).json({ message: 'Invalid or expired OTP' });
             return;
         }
 
-        // Set new password
-        const { password } = req.body;
-
-        if (!password || password.length < 6) {
+        if (password.length < 6) {
             res.status(400).json({ message: 'Password must be at least 6 characters' });
             return;
         }
@@ -205,8 +217,8 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
 
-        // Clear reset token fields
-        user.resetPasswordToken = undefined;
+        // Clear OTP fields
+        user.resetOTP = undefined;
         user.resetPasswordExpire = undefined;
 
         await user.save();

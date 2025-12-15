@@ -78,8 +78,9 @@ export function HydrationCard() {
                         size="sm"
                         onClick={removeGlass}
                         disabled={glasses === 0}
-                        icon={<Minus className="w-4 h-4" />}
-                    />
+                    >
+                        <Minus className="w-4 h-4" />
+                    </Button>
 
                     <div className="text-center">
                         <span className="text-3xl font-bold text-foreground">{glasses}</span>
@@ -91,8 +92,9 @@ export function HydrationCard() {
                         size="sm"
                         onClick={addGlass}
                         disabled={glasses === goal}
-                        icon={<Plus className="w-4 h-4" />}
-                    />
+                    >
+                        <Plus className="w-4 h-4" />
+                    </Button>
                 </div>
 
                 <p className="text-sm text-foreground-muted">

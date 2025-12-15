@@ -15,6 +15,14 @@ export const metadata: Metadata = {
   description: "A modern, calm, and intelligent personal dashboard for college students. Unify tasks, habits, goals, and mood tracking in one beautiful system.",
   keywords: ["productivity", "dashboard", "tasks", "habits", "mood tracking", "life management"],
   authors: [{ name: "Pruthivi" }],
+  manifest: "/manifest.json",
+  themeColor: "#667eea",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "LifeOS",
+  },
   openGraph: {
     title: "LifeOS - Personal Digital Life Dashboard",
     description: "Organize your life with calm and clarity",

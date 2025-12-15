@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@/types';
 import api from '@/lib/api';
-import api from '@/lib/api';
+
 
 interface AuthContextType {
     user: User | null;
@@ -30,8 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (storedToken && storedUser) {
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
-            // Set default axios header
-            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
         setIsLoading(false);
     }, []);
@@ -50,9 +48,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(newToken);
         localStorage.setItem('lifeos-token', newToken);
         localStorage.setItem('lifeos-user', JSON.stringify(normalizedUser));
-
-        // Set default axios header for future requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
     };
 
     const checkAuth = async () => {
@@ -79,7 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(null);
         localStorage.removeItem('lifeos-token');
         localStorage.removeItem('lifeos-user');
-        delete axios.defaults.headers.common['Authorization'];
         // Optional: Redirect to login page
         window.location.href = '/login';
     };

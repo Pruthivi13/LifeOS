@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -10,14 +10,19 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#667eea",
+};
+
 export const metadata: Metadata = {
   title: "LifeOS - Personal Digital Life Dashboard",
   description: "A modern, calm, and intelligent personal dashboard for college students. Unify tasks, habits, goals, and mood tracking in one beautiful system.",
   keywords: ["productivity", "dashboard", "tasks", "habits", "mood tracking", "life management"],
   authors: [{ name: "Pruthivi" }],
   manifest: "/manifest.json",
-  themeColor: "#667eea",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

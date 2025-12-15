@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
                     </h1>
                     <p className="text-muted-foreground">
                         {step === 'email' && 'Enter your email to receive an OTP.'}
-                        {step === 'otp' && 'Check your email for the 6-digit code.'}
+                        {step === 'otp' && 'Check your email (including spam/junk folder) for the 6-digit code.'}
                         {step === 'success' && 'Your password has been reset.'}
                     </p>
                 </div>

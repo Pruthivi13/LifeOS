@@ -163,12 +163,15 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
         // Send OTP via email
         try {
+            console.log(`Sending OTP ${otp} to ${email}`);
             await sendOTPEmail(email, otp);
+            console.log(`OTP email sent successfully to ${email}`);
             res.json({
                 success: true,
                 message: 'OTP sent to your email address',
             });
-        } catch (emailError) {
+        } catch (emailError: any) {
+            console.error('Email sending failed:', emailError.message || emailError);
             // Clear OTP if email fails
             user.resetOTP = undefined;
             user.resetPasswordExpire = undefined;

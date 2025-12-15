@@ -6,6 +6,8 @@ export interface IUser extends Document {
     password?: string;
     avatar?: string;
     googleId?: string;
+    resetPasswordToken?: string;
+    resetPasswordExpire?: Date;
     createdAt: Date;
 }
 
@@ -30,6 +32,12 @@ const UserSchema: Schema = new Schema(
         },
         googleId: {
             type: String,
+        },
+        resetPasswordToken: {
+            type: String,
+        },
+        resetPasswordExpire: {
+            type: Date,
         },
     },
     {

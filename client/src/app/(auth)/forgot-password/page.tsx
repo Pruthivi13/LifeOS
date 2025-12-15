@@ -2,35 +2,33 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [resetUrl, setResetUrl] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
-    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setSuccess('');
+        setResetUrl('');
         setLoading(true);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/login', {
+            const res = await axios.post('http://localhost:5000/api/auth/forgot-password', {
                 email,
-                password,
             });
 
-            login(res.data, res.data.token);
-            router.push('/');
+            setSuccess(res.data.message);
+            setResetUrl(res.data.resetUrl);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to login');
+            setError(err.response?.data?.message || 'Failed to process request');
         } finally {
             setLoading(false);
         }
@@ -51,8 +49,8 @@ export default function LoginPage() {
                 className="w-full max-w-md"
             >
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold tracking-tight mb-2">LifeOS</h1>
-                    <p className="text-muted-foreground">Welcome back to your calm space.</p>
+                    <h1 className="text-4xl font-bold tracking-tight mb-2">Forgot Password</h1>
+                    <p className="text-muted-foreground">Enter your email to receive a reset link.</p>
                 </div>
 
                 <div className="glass-card rounded-2xl p-8 border border-white/20 shadow-xl backdrop-blur-md">
@@ -60,6 +58,19 @@ export default function LoginPage() {
                         {error && (
                             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
                                 {error}
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-500 text-sm text-center">
+                                {success}
+                                {resetUrl && (
+                                    <div className="mt-2">
+                                        <Link href={resetUrl.replace('http://localhost:3000', '')} className="text-primary hover:underline font-medium">
+                                            Click here to reset password
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         )}
 
@@ -75,18 +86,6 @@ export default function LoginPage() {
                                     className="w-full"
                                 />
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 ml-1">Password</label>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className="w-full"
-                                />
-                            </div>
                         </div>
 
                         <Button
@@ -95,20 +94,14 @@ export default function LoginPage() {
                             size="lg"
                             disabled={loading}
                         >
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            {loading ? 'Sending...' : 'Send Reset Link'}
                         </Button>
                     </form>
 
-                    <div className="mt-4 text-center">
-                        <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
-                            Forgot your password?
-                        </Link>
-                    </div>
-
-                    <div className="mt-4 text-center text-sm text-muted-foreground">
-                        Don't have an account?{' '}
-                        <Link href="/register" className="text-primary hover:underline font-medium">
-                            Create one
+                    <div className="mt-6 text-center text-sm text-muted-foreground">
+                        Remember your password?{' '}
+                        <Link href="/login" className="text-primary hover:underline font-medium">
+                            Sign In
                         </Link>
                     </div>
                 </div>

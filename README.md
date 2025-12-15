@@ -2,7 +2,7 @@
 
 **LifeOS** is a comprehensive personal dashboard designed to bring clarity to your daily life. It unifies task management, habit tracking, mood journaling, and detailed analytics into one calm, beautiful interface.
 
-![LifeOS Dashboard](https://placehold.co/800x400?text=LifeOS+Dashboard+Preview)
+![LifeOS Dashboard](client/public/dashboard-preview.png)
 
 ## ✨ Key Features
 

@@ -2,8 +2,11 @@ import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+console.log('API URL:', API_URL); // Debugging
+
 const api = axios.create({
     baseURL: API_URL,
+    timeout: 30000, // 30 seconds timeout
 });
 
 // Add auth token to requests

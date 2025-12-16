@@ -1,24 +1,24 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Header, DashboardLayout } from '@/components/layout';
 import { Card, Input, Button, Avatar } from '@/components/ui';
-import { Camera, Save, ArrowLeft, LogOut } from 'lucide-react';
+import { Save, ArrowLeft, LogOut, Check } from 'lucide-react';
 import api from '@/lib/api';
+import { predefinedAvatars, getAvatarsByCategory, type PredefinedAvatar } from '@/lib/avatars';
 
 export default function ProfilePage() {
     const { user, token, checkAuth, logout } = useAuth();
     const { theme, toggleTheme } = useTheme();
     const router = useRouter();
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedAvatar, setSelectedAvatar] = useState<string>('');
+    const [activeCategory, setActiveCategory] = useState<'male' | 'female' | 'neutral'>('male');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -26,42 +26,26 @@ export default function ProfilePage() {
         if (user) {
             setName(user.name);
             setEmail(user.email);
-            setAvatarPreview(user.avatar || null);
-        } else {
-            // Redirect if not logged in
-            // router.push('/login');
+            setSelectedAvatar(user.avatar || '');
         }
-    }, [user, router]);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setSelectedFile(file);
-            setAvatarPreview(URL.createObjectURL(file));
-        }
-    };
+    }, [user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage(null);
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('email', email);
-        if (selectedFile) {
-            formData.append('avatar', selectedFile);
-        }
-
         try {
-            const res = await api.put('/api/auth/profile', formData, {
+            await api.put('/api/auth/profile', {
+                name,
+                email,
+                avatar: selectedAvatar,
+            }, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`,
                 },
             });
 
-            // Refresh auth state
             await checkAuth();
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (error: any) {
@@ -71,13 +55,19 @@ export default function ProfilePage() {
         }
     };
 
+    const categories = [
+        { key: 'male' as const, label: '👨 Male' },
+        { key: 'female' as const, label: '👩 Female' },
+        { key: 'neutral' as const, label: '🤖 Fun' },
+    ];
+
     return (
         <>
             <DashboardLayout
                 header={
                     <Header
                         userName={user?.name}
-                        userAvatar={user?.avatar}
+                        userAvatar={selectedAvatar || user?.avatar}
                         isDarkMode={theme === 'dark'}
                         onToggleDarkMode={toggleTheme}
                     />
@@ -115,37 +105,61 @@ export default function ProfilePage() {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* Avatar Upload */}
-                            <div className="flex flex-col items-center gap-4">
-                                <div className="relative group">
+                            {/* Avatar Picker */}
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium mb-2">Choose Your Avatar</label>
+
+                                {/* Current Selection */}
+                                <div className="flex justify-center mb-4">
                                     <Avatar
-                                        src={avatarPreview || undefined}
+                                        src={selectedAvatar}
                                         name={name}
                                         size="xl"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white"
-                                    >
-                                        <Camera className="w-8 h-8" />
-                                    </button>
                                 </div>
-                                <input
-                                    type="file"
-                                    ref={fileInputRef}
-                                    onChange={handleFileChange}
-                                    accept="image/*"
-                                    className="hidden"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    Change Photo
-                                </Button>
+
+                                {/* Category Tabs */}
+                                <div className="flex gap-2 justify-center mb-4">
+                                    {categories.map((cat) => (
+                                        <button
+                                            key={cat.key}
+                                            type="button"
+                                            onClick={() => setActiveCategory(cat.key)}
+                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat.key
+                                                    ? 'bg-primary text-white'
+                                                    : 'bg-foreground/5 hover:bg-foreground/10'
+                                                }`}
+                                        >
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Avatar Grid */}
+                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                                    {getAvatarsByCategory(activeCategory).map((avatar) => (
+                                        <button
+                                            key={avatar.id}
+                                            type="button"
+                                            onClick={() => setSelectedAvatar(avatar.url)}
+                                            className={`relative p-2 rounded-xl transition-all ${selectedAvatar === avatar.url
+                                                    ? 'bg-primary/20 ring-2 ring-primary'
+                                                    : 'bg-foreground/5 hover:bg-foreground/10'
+                                                }`}
+                                        >
+                                            <img
+                                                src={avatar.url}
+                                                alt={avatar.name}
+                                                className="w-full aspect-square rounded-lg"
+                                            />
+                                            {selectedAvatar === avatar.url && (
+                                                <div className="absolute top-1 right-1 bg-primary text-white rounded-full p-0.5">
+                                                    <Check className="w-3 h-3" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Form Fields */}
@@ -186,3 +200,4 @@ export default function ProfilePage() {
         </>
     );
 }
+

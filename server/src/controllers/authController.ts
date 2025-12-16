@@ -112,8 +112,9 @@ export const updateProfile = async (req: any, res: Response) => {
                 user.password = await bcrypt.hash(req.body.password, salt);
             }
 
-            if (req.file) {
-                user.avatar = `http://localhost:5000/uploads/${req.file.filename}`;
+            // Accept avatar URL directly from body (for predefined avatars)
+            if (req.body.avatar !== undefined) {
+                user.avatar = req.body.avatar;
             }
 
             const updatedUser = await user.save();

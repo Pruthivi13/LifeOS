@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Modal, Input, Button } from '@/components/ui';
 import { Frequency } from '@/types';
-import { RefreshCw, Tag } from 'lucide-react';
+import { RefreshCw, Tag, ChevronDown } from 'lucide-react';
 
 interface AddHabitModalProps {
     isOpen: boolean;
@@ -46,14 +46,17 @@ export function AddHabitModal({ isOpen, onClose, onAdd, loading }: AddHabitModal
                     <label className="block text-sm font-medium mb-1.5 ml-1 flex items-center gap-2">
                         <RefreshCw className="w-3.5 h-3.5" /> Frequency
                     </label>
-                    <select
-                        value={frequency}
-                        onChange={(e) => setFrequency(e.target.value as Frequency)}
-                        className="w-full h-10 px-3 rounded-xl bg-background-secondary border border-transparent focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm appearance-none cursor-pointer"
-                    >
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                    </select>
+                    <div className="relative">
+                        <select
+                            value={frequency}
+                            onChange={(e) => setFrequency(e.target.value as Frequency)}
+                            className="w-full h-10 px-3 pr-8 rounded-xl bg-background-secondary border border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm appearance-none cursor-pointer"
+                        >
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted pointer-events-none" />
+                    </div>
                 </div>
 
                 <div className="pt-2 flex justify-end gap-3">

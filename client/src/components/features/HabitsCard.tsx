@@ -68,7 +68,7 @@ export function HabitsCard({ habits, onCompleteHabit, onAddHabit, onEditHabit }:
                                 label="Edit habit"
                                 size="sm"
                                 onClick={() => onEditHabit?.(habit)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                             />
                         </div>
 

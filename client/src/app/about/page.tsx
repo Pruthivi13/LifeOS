@@ -128,7 +128,7 @@ export default function AboutPage() {
 
                     {/* Version Info */}
                     <div className="text-center text-sm text-foreground-muted pt-8 pb-4">
-                        <p>Version 1.0.0 • Released Dec 2025</p>
+                        <p>Version 2.0.0 • Dec 2024</p>
                     </div>
                 </div>
             </DashboardLayout>

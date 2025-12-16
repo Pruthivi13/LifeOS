@@ -2,60 +2,79 @@
 
 **LifeOS** is a comprehensive personal dashboard designed to bring clarity to your daily life. It unifies task management, habit tracking, mood journaling, and detailed analytics into one calm, beautiful interface.
 
-![LifeOS Dashboard](client/public/dashboard-preview.png)
+🌐 **Live Demo**: [life-os-b4d6.vercel.app](https://life-os-b4d6.vercel.app)
 
 ## ✨ Key Features
 
 ### 🎯 Smart Task Management
-- **Organize**: Create, edit, and delete daily tasks.
-- **Prioritize**: Tag tasks with High, Medium, or Low priority.
-- **Categories**: Sort tasks by Personal, Work, Health, etc.
+- Create, edit, and delete tasks with priorities (High/Medium/Low)
+- Categories: Personal, Work, Health, Academic
+- Real-time completion tracking
 
 ### ⚡ Habit Tracking
-- **Streak System**: Visualize your consistency with daily streaks.
-- **Detailed History**: View completion history for the last 7 days.
-- **Motivation**: Interactive completion animations.
+- **Streak System**: 7-day visual consistency tracker
+- Interactive completion with animated feedback
+- Edit habits via three-dots menu
 
 ### 😌 Mood & Wellness
-- **Daily Check-in**: Track your mood on a 5-point scale.
-- **Journaling**: (Coming soon) Add notes to your mood entries.
-- **Insights**: See how your mood correlates with your productivity.
+- **Daily Check-in**: Track mood on a 5-point emoji scale
+- **Dynamic Wellness Score**: Combines tasks (30%), hydration (20%), habits (20%), and mood (30%)
+- Score updates **instantly** with every interaction!
 
-### 📊 Analytics & Insights
-- **Productivity Score**: Calculated real-time based on task completion and habit consistency.
-- **Visual Charts**: Beautiful data visualization for easy understanding.
-- **Hydration Tracker**: Specific widget to track daily water intake (Goal: 8/day).
+### 📊 Dynamic Analytics
+- **4 Animated Metric Cards**: Tasks %, Streak, Water, Mood
+- Spring animations on value changes
+- Smart motivational messages based on your progress:
+  - "🌟 Perfect day! You're crushing it!"
+  - "💧 Great hydration! Stay refreshed!"
+  - "💜 It's okay to have off days."
 
-### 🎨 Customizable Experience
-- **Dark/Light Mode**: Fully supported system-wide theming.
-- **Profile Management**: Upload custom avatars and update user details.
-- **Responsive Design**: Works on Desktop and Tablets.
+### 💧 Hydration Tracker
+- Track water intake (8 glasses goal)
+- Visual progress bar with animated dots
+- Directly affects your Wellness Score
+
+### 📱 PWA & Mobile Support
+- **Install as App**: Works like a native mobile app
+- Responsive design for all screen sizes
+- Dark/Light mode theming
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (Client)
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+### Frontend
+- **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS 4
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 
-### Backend (Server)
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB (Mongoose ODM)
-- **Authentication**: JWT & BCrypt
+### Backend
+- **Runtime**: Node.js + Express.js
+- **Database**: MongoDB Atlas
+- **Auth**: JWT + BCrypt
+- **Email**: Resend API (for password reset)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Deployment
+
+### Frontend (Vercel)
+- Hosted at: `life-os-b4d6.vercel.app`
+- Auto-deploys from GitHub `master` branch
+
+### Backend (Render)
+- Hosted at: `lifeos-sygr.onrender.com`
+- Environment variables: `PORT`, `MONGO_URI`, `JWT_SECRET`
+
+---
+
+## 🏃 Getting Started (Local Development)
 
 ### Prerequisites
 - Node.js (v18+)
 - MongoDB (Local or Atlas)
-- Git
 
 ### Installation
 
@@ -71,7 +90,7 @@
    npm install
    # Create .env file with:
    # PORT=5000
-   # TASKS_DB_URI=your_mongodb_uri
+   # MONGO_URI=your_mongodb_uri
    # JWT_SECRET=your_secret
    npm run dev
    ```
@@ -84,7 +103,7 @@
    ```
 
 4. **Access the App**
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+   Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
@@ -94,13 +113,18 @@
 LifeOS/
 ├── client/           # Next.js Frontend
 │   ├── src/app/      # Pages & Layouts
-│   ├── src/components/ # Reusable UI Components
-│   └── ...
+│   ├── src/components/
+│   │   ├── features/ # TasksCard, HabitsCard, AnalyticsCard, etc.
+│   │   ├── ui/       # Button, Card, Modal, Dropdown, etc.
+│   │   └── layout/   # Header, DashboardLayout
+│   └── src/context/  # AuthContext, ThemeContext
 └── server/           # Express Backend
-    ├── src/models/   # Mongoose Schemas
-    ├── src/routes/   # API Routes
+    ├── src/models/   # User, Task, Habit, Mood schemas
+    ├── src/routes/   # API endpoints
     └── src/controllers/
 ```
+
 ## 📄 License
 
-MIT License. Built with ❤️ for productivity.
+MIT License. Built with ❤️ for productivity by [Pruthiviraj Sahu](https://github.com/Pruthivi13)
+

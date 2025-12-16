@@ -5,7 +5,7 @@ import { Button, Card } from '@/components/ui';
 import { Header, DashboardLayout } from '@/components/layout';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { ArrowLeft, CheckCircle2, BarChart2, Smile, Zap, Droplets, Palette } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, BarChart2, Smile, Zap, Droplets, Palette, Activity, Bell, Smartphone } from 'lucide-react';
 import {
     TasksCard,
     HabitsCard,
@@ -25,32 +25,42 @@ export default function AboutPage() {
         {
             icon: <CheckCircle2 className="w-6 h-6 text-primary" />,
             title: "Task Management",
-            desc: "Organize your day with a smart todo list. Set priorities, track progress, and never miss a deadline."
+            desc: "Organize your day with a smart todo list. Set priorities, categories, and track completion in real-time."
         },
         {
             icon: <Zap className="w-6 h-6 text-warm-amber" />,
             title: "Habit Tracking",
-            desc: "Build lasting habits with our intuitive streak system. visualizing your consistency motivates you to keep going."
+            desc: "Build lasting habits with our streak system. Visualize your 7-day consistency with interactive tracking."
         },
         {
             icon: <Smile className="w-6 h-6 text-sage-green" />,
             title: "Mood Journaling",
-            desc: "Track your emotional well-being. See how your productivity correlates with your mood over time."
+            desc: "Track your emotional well-being daily. See how your mood correlates with productivity over time."
         },
         {
-            icon: <BarChart2 className="w-6 h-6 text-soft-blue" />,
-            title: "Smart Analytics",
-            desc: "Get insights into your life. Visualize your productivity trends and habit streaks with beautiful charts."
+            icon: <Activity className="w-6 h-6 text-soft-blue" />,
+            title: "Dynamic Wellness Score",
+            desc: "Real-time score combining tasks (30%), hydration (20%), habits (20%), and mood (30%). Updates instantly!"
         },
         {
             icon: <Droplets className="w-6 h-6 text-cyan-400" />,
             title: "Hydration Tracker",
-            desc: "Stay hydrated throughout the day. Track your water intake and reach your daily goals."
+            desc: "Track your water intake with a goal of 8 glasses daily. Every glass boosts your wellness score."
         },
         {
-            icon: <Palette className="w-6 h-6 text-purple-400" />,
-            title: "Customizable Design",
-            desc: "Personalize your experience with a beautiful dark mode and a calm, distraction-free interface."
+            icon: <BarChart2 className="w-6 h-6 text-purple-400" />,
+            title: "Smart Analytics",
+            desc: "Beautiful animated cards showing tasks, streak, water, and mood. Dynamic motivational messages adapt to your progress."
+        },
+        {
+            icon: <Smartphone className="w-6 h-6 text-pink-400" />,
+            title: "PWA Support",
+            desc: "Install LifeOS on your phone like a native app. Works offline and provides a seamless mobile experience."
+        },
+        {
+            icon: <Palette className="w-6 h-6 text-amber-400" />,
+            title: "Dark/Light Mode",
+            desc: "Beautiful theming that adapts to your preference. Calm, distraction-free interface for focused productivity."
         }
     ];
 

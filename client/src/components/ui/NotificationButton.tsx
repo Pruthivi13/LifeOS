@@ -96,19 +96,15 @@ export function NotificationButton() {
         }
     };
 
-    if (!isSupported) {
-        return null;
-    }
-
     return (
         <button
-            onClick={isSubscribed ? unsubscribe : subscribe}
-            disabled={loading}
+            onClick={isSupported ? (isSubscribed ? unsubscribe : subscribe) : undefined}
+            disabled={loading || !isSupported}
             className={`p-2 rounded-lg transition-all duration-200 ${isSubscribed
-                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title={isSubscribed ? 'Disable notifications' : 'Enable notifications'}
+                ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                } ${(loading || !isSupported) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title={!isSupported ? 'Notifications not supported' : (isSubscribed ? 'Disable notifications' : 'Enable notifications')}
         >
             {loading ? (
                 <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />

@@ -128,7 +128,7 @@ export default function AboutPage() {
 
                     {/* Version Info */}
                     <div className="text-center text-sm text-foreground-muted pt-8 pb-4 space-y-2">
-                        <p>Version 2.0.0 • Dec 2024</p>
+                        <p>Version 2.0.0 • Dec 2025</p>
                         <a href="/feedback" className="text-primary hover:underline">
                             Send Feedback →
                         </a>

@@ -40,9 +40,14 @@ export default function FeedbackPage() {
                 message,
             });
 
-            setStatus({ type: 'success', text: 'Thank you for your feedback! We\'ll get back to you soon.' });
+            setStatus({ type: 'success', text: 'Feedback submitted successfully! Redirecting...' });
             setSubject('');
             setMessage('');
+
+            // Redirect to homepage after showing success
+            setTimeout(() => {
+                router.push('/');
+            }, 1500);
         } catch (error: any) {
             setStatus({
                 type: 'error',
@@ -89,8 +94,8 @@ export default function FeedbackPage() {
 
                         {status && (
                             <div className={`p-4 rounded-xl mb-6 text-sm ${status.type === 'success'
-                                    ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
-                                    : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                                ? 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20'
+                                : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                                 }`}>
                                 {status.text}
                             </div>

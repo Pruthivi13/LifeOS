@@ -22,16 +22,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Initialize auth state from local storage
+    // Initialize auth state from local storage and sync with server
     useEffect(() => {
-        const storedToken = localStorage.getItem('lifeos-token');
-        const storedUser = localStorage.getItem('lifeos-user');
+        const initAuth = async () => {
+            const storedToken = localStorage.getItem('lifeos-token');
+            const storedUser = localStorage.getItem('lifeos-user');
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
+            if (storedToken && storedUser) {
+                setToken(storedToken);
+                // Set cached user first for immediate display
+                setUser(JSON.parse(storedUser));
+
+                // Then fetch fresh data from server to sync
+                try {
+                    const res = await api.get('/api/auth/me', {
+                        headers: { Authorization: `Bearer ${storedToken}` }
+                    });
+                    if (res.data) {
+                        const freshUser: User = {
+                            _id: res.data._id || res.data.id,
+                            name: res.data.name,
+                            avatar: res.data.avatar || '',
+                            email: res.data.email,
+                            createdAt: new Date(res.data.createdAt || Date.now())
+                        };
+                        setUser(freshUser);
+                        localStorage.setItem('lifeos-user', JSON.stringify(freshUser));
+                    }
+                } catch (error) {
+                    console.error('Failed to sync user data:', error);
+                }
+            }
+            setIsLoading(false);
+        };
+
+        initAuth();
     }, []);
 
     const login = (userData: any, newToken: string) => {

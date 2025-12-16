@@ -48,6 +48,11 @@ export default function ProfilePage() {
 
             await checkAuth();
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
+
+            // Redirect to homepage after a short delay
+            setTimeout(() => {
+                router.push('/');
+            }, 1000);
         } catch (error: any) {
             setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update profile' });
         } finally {
@@ -126,8 +131,8 @@ export default function ProfilePage() {
                                             type="button"
                                             onClick={() => setActiveCategory(cat.key)}
                                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === cat.key
-                                                    ? 'bg-primary text-white'
-                                                    : 'bg-foreground/5 hover:bg-foreground/10'
+                                                ? 'bg-primary text-white'
+                                                : 'bg-foreground/5 hover:bg-foreground/10'
                                                 }`}
                                         >
                                             {cat.label}
@@ -143,8 +148,8 @@ export default function ProfilePage() {
                                             type="button"
                                             onClick={() => setSelectedAvatar(avatar.url)}
                                             className={`relative p-2 rounded-xl transition-all ${selectedAvatar === avatar.url
-                                                    ? 'bg-primary/20 ring-2 ring-primary'
-                                                    : 'bg-foreground/5 hover:bg-foreground/10'
+                                                ? 'bg-primary/20 ring-2 ring-primary'
+                                                : 'bg-foreground/5 hover:bg-foreground/10'
                                                 }`}
                                         >
                                             <img

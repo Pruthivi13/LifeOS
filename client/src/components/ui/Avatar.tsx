@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface AvatarProps {
     src?: string;
@@ -30,6 +30,13 @@ export function Avatar({
     className = '',
 }: AvatarProps) {
     const [imageError, setImageError] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    // Reset error and loaded state when src changes
+    useEffect(() => {
+        setImageError(false);
+        setImageLoaded(false);
+    }, [src]);
 
     // Generate initials from name
     const initials = name

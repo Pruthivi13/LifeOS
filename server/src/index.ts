@@ -35,6 +35,7 @@ app.use('/api/tasks', require('./routes/taskRoutes').default);
 app.use('/api/habits', require('./routes/habitRoutes').default);
 app.use('/api/moods', require('./routes/moodRoutes').default);
 app.use('/api/notifications', require('./routes/notificationRoutes').default);
+app.use('/api/feedback', require('./routes/feedbackRoutes').default);
 
 // Start Server
 app.listen(PORT, () => {

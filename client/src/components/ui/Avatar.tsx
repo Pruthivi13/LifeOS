@@ -51,19 +51,26 @@ export function Avatar({
         return colors[index];
     };
 
+    const dimensions = sizePx[size];
+
     if (src) {
         return (
             <div
-                className={`
-          relative rounded-full overflow-hidden
-          ${sizeClasses[size]}
-          ${className}
-        `}
+                className={`relative rounded-full overflow-hidden flex-shrink-0 ${className}`}
+                style={{
+                    width: dimensions,
+                    height: dimensions,
+                    minWidth: dimensions,
+                    minHeight: dimensions
+                }}
             >
                 <img
                     src={src}
                     alt={alt}
-                    className="object-cover w-full h-full"
+                    width={dimensions}
+                    height={dimensions}
+                    className="object-cover"
+                    style={{ width: '100%', height: '100%' }}
                     onError={(e) => {
                         console.error('Error loading avatar:', src);
                         e.currentTarget.style.display = 'none';
@@ -75,15 +82,17 @@ export function Avatar({
 
     return (
         <div
-            className={`
-        flex items-center justify-center
-        rounded-full font-medium text-white
-        ${sizeClasses[size]}
-        ${className}
-      `}
-            style={{ backgroundColor: getColorFromName(name) }}
+            className={`flex items-center justify-center rounded-full font-medium text-white flex-shrink-0 ${className}`}
+            style={{
+                backgroundColor: getColorFromName(name),
+                width: dimensions,
+                height: dimensions,
+                minWidth: dimensions,
+                minHeight: dimensions
+            }}
         >
             {initials}
         </div>
     );
 }
+

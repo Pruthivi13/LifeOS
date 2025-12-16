@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Github, Twitter, Info, Heart } from 'lucide-react';
+import { Github, Twitter, Info, Heart, Globe } from 'lucide-react';
 
 export function Footer() {
     return (
@@ -33,6 +33,17 @@ export function Footer() {
                     </Link>
 
                     <a
+                        href="https://portfolio-ivory-sigma-60.vercel.app/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-foreground-muted hover:text-primary transition-colors"
+                        aria-label="Portfolio"
+                        title="Portfolio"
+                    >
+                        <Globe className="w-5 h-5" />
+                    </a>
+
+                    <a
                         href="https://github.com/Pruthivi13"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -54,5 +65,9 @@ export function Footer() {
                 </div>
             </div>
         </footer>
+    );
+}
+            </div >
+        </footer >
     );
 }

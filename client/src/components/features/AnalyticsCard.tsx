@@ -71,60 +71,116 @@ export function AnalyticsCard({ stats }: AnalyticsCardProps) {
                 <>
                     <div className="grid grid-cols-2 gap-3">
                         {/* Task Progress */}
-                        <div className="p-3 bg-purple-500/5 dark:bg-purple-500/10 rounded-xl border border-purple-500/10">
+                        <motion.div
+                            key={`tasks-${taskProgress}`}
+                            initial={{ scale: 0.95, opacity: 0.8 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className="p-3 bg-purple-500/5 dark:bg-purple-500/10 rounded-xl border border-purple-500/10"
+                        >
                             <div className="flex items-center gap-2 mb-1">
                                 <CheckCircle className="w-4 h-4 text-purple-500" />
                                 <span className="text-xs font-medium text-purple-900 dark:text-purple-300">Tasks</span>
                             </div>
-                            <div className="text-xl font-bold text-foreground">
+                            <motion.div
+                                key={taskProgress}
+                                initial={{ scale: 1.2 }}
+                                animate={{ scale: 1 }}
+                                className="text-xl font-bold text-foreground"
+                            >
                                 {taskProgress}%
-                            </div>
+                            </motion.div>
                             <p className="text-xs text-foreground-muted">
                                 {stats.completedTasks}/{stats.totalTasks}
                             </p>
-                        </div>
+                        </motion.div>
 
                         {/* Habit Streak */}
-                        <div className="p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/10">
+                        <motion.div
+                            key={`streak-${stats.habitStreak}`}
+                            initial={{ scale: 0.95, opacity: 0.8 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className="p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/10"
+                        >
                             <div className="flex items-center gap-2 mb-1">
-                                <Flame className="w-4 h-4 text-amber-500" />
+                                <motion.div
+                                    animate={{ rotate: stats.habitStreak > 0 ? [0, -10, 10, 0] : 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Flame className="w-4 h-4 text-amber-500" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-amber-900 dark:text-amber-300">Streak</span>
                             </div>
-                            <div className="text-xl font-bold text-foreground">
+                            <motion.div
+                                key={stats.habitStreak}
+                                initial={{ scale: 1.2 }}
+                                animate={{ scale: 1 }}
+                                className="text-xl font-bold text-foreground"
+                            >
                                 {stats.habitStreak}
-                            </div>
+                            </motion.div>
                             <p className="text-xs text-foreground-muted">
                                 days avg
                             </p>
-                        </div>
+                        </motion.div>
 
                         {/* Hydration */}
-                        <div className="p-3 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border border-blue-500/10">
+                        <motion.div
+                            key={`water-${stats.hydrationGlasses}`}
+                            initial={{ scale: 0.95, opacity: 0.8 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className="p-3 bg-blue-500/5 dark:bg-blue-500/10 rounded-xl border border-blue-500/10"
+                        >
                             <div className="flex items-center gap-2 mb-1">
-                                <Droplets className="w-4 h-4 text-blue-500" />
+                                <motion.div
+                                    animate={{ y: [0, -3, 0] }}
+                                    transition={{ duration: 0.3 }}
+                                    key={stats.hydrationGlasses}
+                                >
+                                    <Droplets className="w-4 h-4 text-blue-500" />
+                                </motion.div>
                                 <span className="text-xs font-medium text-blue-900 dark:text-blue-300">Water</span>
                             </div>
-                            <div className="text-xl font-bold text-foreground">
+                            <motion.div
+                                key={`hydration-val-${stats.hydrationGlasses}`}
+                                initial={{ scale: 1.2 }}
+                                animate={{ scale: 1 }}
+                                className="text-xl font-bold text-foreground"
+                            >
                                 {stats.hydrationGlasses || 0}/8
-                            </div>
+                            </motion.div>
                             <p className="text-xs text-foreground-muted">
                                 glasses
                             </p>
-                        </div>
+                        </motion.div>
 
                         {/* Today's Mood */}
-                        <div className="p-3 bg-green-500/5 dark:bg-green-500/10 rounded-xl border border-green-500/10">
+                        <motion.div
+                            key={`mood-${stats.todayMood}`}
+                            initial={{ scale: 0.95, opacity: 0.8 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className="p-3 bg-green-500/5 dark:bg-green-500/10 rounded-xl border border-green-500/10"
+                        >
                             <div className="flex items-center gap-2 mb-1">
                                 <Smile className="w-4 h-4 text-green-500" />
                                 <span className="text-xs font-medium text-green-900 dark:text-green-300">Mood</span>
                             </div>
-                            <div className="text-xl font-bold text-foreground">
+                            <motion.div
+                                key={`mood-emoji-${stats.todayMood}`}
+                                initial={{ scale: 1.5, rotate: -10 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                transition={{ type: 'spring', stiffness: 400 }}
+                                className="text-xl font-bold text-foreground"
+                            >
                                 {getMoodEmoji(stats.todayMood)}
-                            </div>
+                            </motion.div>
                             <p className="text-xs text-foreground-muted">
                                 today
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
 
                     {/* Dynamic Motivational Message */}

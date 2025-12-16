@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MoreHorizontal, CheckCircle, ListTodo } from 'lucide-react';
+import { Plus, MoreHorizontal, CheckCircle, ListTodo, Pencil } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, Checkbox, Button, IconButton, Dropdown } from '@/components/ui';
 import { Task, Priority } from '@/types';
@@ -10,6 +10,7 @@ interface TasksCardProps {
     tasks: Task[];
     onToggleTask?: (taskId: string) => void;
     onAddTask?: () => void;
+    onEditTask?: (task: Task) => void;
 }
 
 const priorityLabels: Record<Priority, string> = {
@@ -18,7 +19,7 @@ const priorityLabels: Record<Priority, string> = {
     low: 'Low',
 };
 
-export function TasksCard({ tasks, onToggleTask, onAddTask }: TasksCardProps) {
+export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask }: TasksCardProps) {
     // Removed local state to rely on parent props
     const handleToggle = (taskId: string) => {
         onToggleTask?.(taskId);
@@ -64,7 +65,7 @@ export function TasksCard({ tasks, onToggleTask, onAddTask }: TasksCardProps) {
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 10 }}
                             transition={{ delay: index * 0.05 }}
-                            className="flex items-center justify-between gap-3 py-2"
+                            className="group flex items-center justify-between gap-3 py-2"
                         >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <Checkbox
@@ -82,9 +83,18 @@ export function TasksCard({ tasks, onToggleTask, onAddTask }: TasksCardProps) {
                                 </div>
                             </div>
 
-                            <span className={`priority-tag priority-tag--${task.priority}`}>
-                                {priorityLabels[task.priority]}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => onEditTask?.(task)}
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                                    title="Edit task"
+                                >
+                                    <Pencil className="w-4 h-4" />
+                                </button>
+                                <span className={`priority-tag priority-tag--${task.priority}`}>
+                                    {priorityLabels[task.priority]}
+                                </span>
+                            </div>
                         </motion.div>
                     ))}
                 </AnimatePresence>
@@ -104,3 +114,4 @@ export function TasksCard({ tasks, onToggleTask, onAddTask }: TasksCardProps) {
         </Card>
     );
 }
+

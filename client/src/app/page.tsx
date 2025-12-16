@@ -13,7 +13,8 @@ import {
   HydrationCard,
   AddTaskModal,
   AddHabitModal,
-  EditHabitModal
+  EditHabitModal,
+  EditTaskModal
 } from '@/components/features';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
@@ -32,9 +33,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   // Modal State
-  const [activeModal, setActiveModal] = useState<'none' | 'task' | 'habit' | 'editHabit'>('none');
+  const [activeModal, setActiveModal] = useState<'none' | 'task' | 'habit' | 'editHabit' | 'editTask'>('none');
   const [modalLoading, setModalLoading] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [hydrationGlasses, setHydrationGlasses] = useState(0);
 
   // Auth Protection
@@ -179,6 +181,41 @@ export default function Home() {
     }
   };
 
+  const openEditTask = (task: Task) => {
+    setSelectedTask(task);
+    setActiveModal('editTask');
+  };
+
+  const handleEditTask = async (id: string, updates: Partial<Task>) => {
+    try {
+      setModalLoading(true);
+      await api.put(`/api/tasks/${id}`, updates);
+      const res = await api.get('/api/tasks');
+      setTasks(res.data);
+      setActiveModal('none');
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Failed to update task', error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    try {
+      setModalLoading(true);
+      await api.delete(`/api/tasks/${id}`);
+      const res = await api.get('/api/tasks');
+      setTasks(res.data);
+      setActiveModal('none');
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Failed to delete task', error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   // Calculations
   const completedTasksCount = tasks.filter((t) => t.completed).length;
   const totalTasksCount = tasks.length;
@@ -247,6 +284,7 @@ export default function Home() {
             tasks={tasks}
             onToggleTask={handleTaskToggle}
             onAddTask={() => setActiveModal('task')}
+            onEditTask={openEditTask}
           />
 
           <HabitsCard
@@ -305,6 +343,15 @@ export default function Home() {
         onEdit={handleEditHabit}
         onDelete={handleDeleteHabit}
         habit={selectedHabit}
+        loading={modalLoading}
+      />
+
+      <EditTaskModal
+        isOpen={activeModal === 'editTask'}
+        onClose={() => { setActiveModal('none'); setSelectedTask(null); }}
+        onSave={handleEditTask}
+        onDelete={handleDeleteTask}
+        task={selectedTask}
         loading={modalLoading}
       />
     </>

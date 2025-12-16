@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 
-import { Footer } from './Footer';
+import { Footer } from './AppFooter';
 
 interface DashboardLayoutProps {
     children: ReactNode;

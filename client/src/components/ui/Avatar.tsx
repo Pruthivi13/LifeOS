@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import { useState } from 'react';
 
 interface AvatarProps {
     src?: string;
@@ -8,18 +8,18 @@ interface AvatarProps {
     className?: string;
 }
 
-const sizeClasses = {
-    sm: 'w-8 h-8 text-xs',
-    md: 'w-10 h-10 text-sm',
-    lg: 'w-12 h-12 text-base',
-    xl: 'w-32 h-32 text-4xl',
-};
-
 const sizePx = {
     sm: 32,
     md: 40,
     lg: 48,
     xl: 128,
+};
+
+const fontSizes = {
+    sm: '0.75rem',
+    md: '0.875rem',
+    lg: '1rem',
+    xl: '2.25rem',
 };
 
 export function Avatar({
@@ -29,6 +29,8 @@ export function Avatar({
     size = 'md',
     className = '',
 }: AvatarProps) {
+    const [imageError, setImageError] = useState(false);
+
     // Generate initials from name
     const initials = name
         ? name
@@ -54,47 +56,55 @@ export function Avatar({
     };
 
     const dimensions = sizePx[size];
-
-    if (src) {
-        return (
-            <div
-                className={`relative rounded-full overflow-hidden flex-shrink-0 ${className}`}
-                style={{
-                    width: dimensions,
-                    height: dimensions,
-                    minWidth: dimensions,
-                    minHeight: dimensions
-                }}
-            >
-                <img
-                    src={src}
-                    alt={alt}
-                    width={dimensions}
-                    height={dimensions}
-                    className="object-cover"
-                    style={{ width: '100%', height: '100%' }}
-                    onError={(e) => {
-                        console.error('Error loading avatar:', src);
-                        e.currentTarget.style.display = 'none';
-                    }}
-                />
-            </div>
-        );
-    }
+    const showImage = src && !imageError;
 
     return (
         <div
-            className={`flex items-center justify-center rounded-full font-medium text-white flex-shrink-0 ${className}`}
+            className={`relative rounded-full overflow-hidden flex-shrink-0 ${className}`}
             style={{
+                width: `${dimensions}px`,
+                height: `${dimensions}px`,
+                minWidth: `${dimensions}px`,
+                minHeight: `${dimensions}px`,
                 backgroundColor: getColorFromName(name),
-                width: dimensions,
-                height: dimensions,
-                minWidth: dimensions,
-                minHeight: dimensions
             }}
         >
-            {initials}
+            {/* Always visible initials as fallback */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: fontSizes[size],
+                }}
+            >
+                {initials}
+            </div>
+
+            {/* Image overlay (only when src exists and hasn't errored) */}
+            {showImage && (
+                <img
+                    src={src}
+                    alt={alt}
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                    }}
+                    onError={() => {
+                        console.error('Error loading avatar:', src);
+                        setImageError(true);
+                    }}
+                />
+            )}
         </div>
     );
 }
+
 

@@ -100,14 +100,14 @@ export default function AboutPage() {
                     </div>
 
                     {/* Features Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {features.map((feature, i) => (
                             <Card key={i} className="p-6 hover:translate-y-[-2px] transition-transform duration-300">
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 h-full">
                                     <div className="p-3 w-fit rounded-xl bg-background-secondary/50">
                                         {feature.icon}
                                     </div>
-                                    <div>
+                                    <div className="flex-1">
                                         <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                                         <p className="text-foreground-muted leading-relaxed text-sm">
                                             {feature.desc}

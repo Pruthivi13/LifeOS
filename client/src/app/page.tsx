@@ -180,11 +180,6 @@ export default function Home() {
   };
 
   // Calculations
-  const moodScore = moods.length > 0
-    ? Math.round(moods.reduce((acc, m) => acc + m.mood, 0) / moods.length * 20)
-    : 0;
-  const moodLabel = getMoodLabel(moodScore);
-
   const completedTasksCount = tasks.filter((t) => t.completed).length;
   const totalTasksCount = tasks.length;
   const habitStreak = habits.length > 0
@@ -196,10 +191,37 @@ export default function Home() {
     ? moods.find(m => new Date(m.date).toDateString() === new Date().toDateString())?.mood || 0
     : 0;
 
-  // Dynamic Insight Logic
+  // Calculate individual scores (0-100 each)
+  const taskScore = totalTasksCount > 0
+    ? Math.round((completedTasksCount / totalTasksCount) * 100)
+    : 50; // Default to 50 if no tasks
+  const hydrationScore = Math.round((hydrationGlasses / 8) * 100);
+  const habitScore = Math.min(habitStreak * 20, 100); // Max 100 at 5+ days streak
+  const moodScoreRaw = todayMood > 0 ? todayMood * 20 : 50; // Convert 1-5 to 0-100, default 50
+
+  // Composite Wellness Score (weighted average)
+  // Tasks: 30%, Hydration: 20%, Habits: 20%, Mood: 30%
+  const wellnessScore = Math.round(
+    (taskScore * 0.30) +
+    (hydrationScore * 0.20) +
+    (habitScore * 0.20) +
+    (moodScoreRaw * 0.30)
+  );
+
+  // Get label based on wellness score
+  const getWellnessLabel = (score: number) => {
+    if (score >= 80) return 'Excellent';
+    if (score >= 60) return 'Good';
+    if (score >= 40) return 'Okay';
+    if (score >= 20) return 'Low';
+    return 'Start Fresh';
+  };
+  const wellnessLabel = getWellnessLabel(wellnessScore);
+
+  // Dynamic Insight Logic (now uses wellness score)
   let currentInsight = weeklyInsight;
-  if (moodScore > 80) currentInsight = "You're radiating positivity! Keep it up.";
-  else if (moodScore < 40 && moodScore > 0) currentInsight = "It's okay to have low days. Be kind to yourself.";
+  if (wellnessScore >= 80) currentInsight = "You're radiating positivity! Keep it up.";
+  else if (wellnessScore < 40 && wellnessScore > 0) currentInsight = "It's okay to have low days. Be kind to yourself.";
   else if (completedTasksCount > 5) currentInsight = "You are crushing your tasks effortlessly.";
   else if (habitStreak > 3) currentInsight = "Your consistency is inspiring!";
 
@@ -253,9 +275,9 @@ export default function Home() {
           />
 
           <MoodCard
-            score={moodScore}
-            label={moodLabel}
-            period="This week"
+            score={wellnessScore}
+            label={wellnessLabel}
+            period="Today"
             todayMood={todayMood}
           />
 

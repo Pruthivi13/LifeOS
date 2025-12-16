@@ -121,8 +121,7 @@ export default function ProfilePage() {
                                     <Avatar
                                         src={avatarPreview || undefined}
                                         name={name}
-                                        size="lg"
-                                        className="w-32 h-32 md:w-32 md:h-32 text-4xl"
+                                        size="xl"
                                     />
                                     <button
                                         type="button"

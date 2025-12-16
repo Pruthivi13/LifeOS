@@ -35,6 +35,7 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<'none' | 'task' | 'habit' | 'editHabit'>('none');
   const [modalLoading, setModalLoading] = useState(false);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [hydrationGlasses, setHydrationGlasses] = useState(0);
 
   // Auth Protection
   useEffect(() => {
@@ -190,6 +191,11 @@ export default function Home() {
     ? Math.round(habits.reduce((acc, h) => acc + h.streakCount, 0) / habits.length)
     : 0;
 
+  // Get today's mood (latest mood entry for today)
+  const todayMood = moods.length > 0
+    ? moods.find(m => new Date(m.date).toDateString() === new Date().toDateString())?.mood || 0
+    : 0;
+
   // Dynamic Insight Logic
   let currentInsight = weeklyInsight;
   if (moodScore > 80) currentInsight = "You're radiating positivity! Keep it up.";
@@ -240,7 +246,9 @@ export default function Home() {
             stats={{
               completedTasks: completedTasksCount,
               totalTasks: totalTasksCount,
-              habitStreak: habitStreak
+              habitStreak: habitStreak,
+              hydrationGlasses: hydrationGlasses,
+              todayMood: todayMood
             }}
           />
 
@@ -250,7 +258,7 @@ export default function Home() {
             period="This week"
           />
 
-          <HydrationCard />
+          <HydrationCard onHydrationChange={setHydrationGlasses} />
         </DashboardGrid>
       </DashboardLayout>
 

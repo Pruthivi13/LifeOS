@@ -5,7 +5,11 @@ import { motion } from 'framer-motion';
 import { Minus, Plus, Droplets } from 'lucide-react';
 import { Card, CardHeader, Button } from '@/components/ui';
 
-export function HydrationCard() {
+interface HydrationCardProps {
+    onHydrationChange?: (glasses: number) => void;
+}
+
+export function HydrationCard({ onHydrationChange }: HydrationCardProps) {
     const [glasses, setGlasses] = useState(0);
     const goal = 8; // Standard 8 glasses goal
 
@@ -17,8 +21,10 @@ export function HydrationCard() {
             // Reset if it's a new day
             if (new Date(date).toDateString() !== new Date().toDateString()) {
                 setGlasses(0);
+                onHydrationChange?.(0);
             } else {
                 setGlasses(count);
+                onHydrationChange?.(count);
             }
         }
     }, []);
@@ -30,7 +36,8 @@ export function HydrationCard() {
             count: glasses
         };
         localStorage.setItem('lifeos-hydration', JSON.stringify(data));
-    }, [glasses]);
+        onHydrationChange?.(glasses);
+    }, [glasses, onHydrationChange]);
 
     const addGlass = () => {
         if (glasses < goal) setGlasses(prev => prev + 1);

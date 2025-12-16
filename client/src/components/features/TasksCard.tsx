@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus, MoreHorizontal, CheckCircle, ListTodo } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardHeader, Checkbox, Button, IconButton } from '@/components/ui';
+import { Card, CardHeader, Checkbox, Button, IconButton, Dropdown } from '@/components/ui';
 import { Task, Priority } from '@/types';
 
 interface TasksCardProps {
@@ -35,16 +35,24 @@ export function TasksCard({ tasks, onToggleTask, onAddTask }: TasksCardProps) {
         return dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
+    const dropdownItems = [
+        {
+            label: 'Add Task',
+            icon: <Plus className="w-4 h-4" />,
+            onClick: () => onAddTask?.(),
+        },
+        {
+            label: 'View Completed',
+            icon: <CheckCircle className="w-4 h-4" />,
+            onClick: () => console.log('View completed tasks'),
+        },
+    ];
+
     return (
         <Card>
             <CardHeader
                 title="Today's Tasks"
-                action={
-                    <IconButton
-                        icon={<MoreHorizontal className="w-5 h-5" />}
-                        label="More options"
-                    />
-                }
+                action={<Dropdown items={dropdownItems} />}
             />
 
             <div className="space-y-3">

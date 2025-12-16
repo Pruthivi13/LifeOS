@@ -1,9 +1,9 @@
 'use client';
 
 
-import { MoreHorizontal, Plus } from 'lucide-react';
+import { MoreHorizontal, Plus, ListChecks } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Card, CardHeader, IconButton, Button } from '@/components/ui';
+import { Card, CardHeader, IconButton, Button, Dropdown } from '@/components/ui';
 import { Habit } from '@/types';
 
 interface HabitsCardProps {
@@ -39,16 +39,24 @@ export function HabitsCard({ habits, onCompleteHabit, onAddHabit, onEditHabit }:
         return emojis[index % emojis.length];
     };
 
+    const dropdownItems = [
+        {
+            label: 'Add Habit',
+            icon: <Plus className="w-4 h-4" />,
+            onClick: () => onAddHabit?.(),
+        },
+        {
+            label: 'View All Habits',
+            icon: <ListChecks className="w-4 h-4" />,
+            onClick: () => console.log('View all habits'),
+        },
+    ];
+
     return (
         <Card>
             <CardHeader
                 title="Habits"
-                action={
-                    <IconButton
-                        icon={<MoreHorizontal className="w-5 h-5" />}
-                        label="More options"
-                    />
-                }
+                action={<Dropdown items={dropdownItems} />}
             />
 
             <div className="space-y-4">

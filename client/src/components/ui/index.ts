@@ -6,3 +6,4 @@ export { Input, SearchInput } from './Input';
 export { Avatar } from './Avatar';
 export { Modal } from './Modal';
 export { NotificationButton } from './NotificationButton';
+export { Dropdown } from './Dropdown';

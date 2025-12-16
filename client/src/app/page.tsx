@@ -20,6 +20,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { Task, Habit, MoodEntry } from '@/types';
 import { getMoodLabel, weeklyInsight } from '@/lib/mockData';
+import { useNotificationReminders } from '@/hooks/useNotificationReminders';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -218,10 +219,19 @@ export default function Home() {
 
   // Calculations
   const completedTasksCount = tasks.filter((t) => t.completed).length;
+  const pendingTasksCount = tasks.filter((t) => !t.completed).length;
   const totalTasksCount = tasks.length;
   const habitStreak = habits.length > 0
     ? Math.round(habits.reduce((acc, h) => acc + h.streakCount, 0) / habits.length)
     : 0;
+
+  // Enable notification reminders for hydration and pending tasks
+  useNotificationReminders({
+    hydrationEnabled: true,
+    tasksEnabled: true,
+    hydrationIntervalMinutes: 120, // Every 2 hours
+    pendingTasksCount,
+  });
 
   // Get today's mood (latest mood entry for today)
   const todayMood = moods.length > 0

@@ -256,6 +256,7 @@ export default function Home() {
             score={moodScore}
             label={moodLabel}
             period="This week"
+            todayMood={todayMood}
           />
 
           <HydrationCard onHydrationChange={setHydrationGlasses} />

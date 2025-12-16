@@ -39,13 +39,13 @@ export function Avatar({
 
     // Generate a consistent color based on name
     const getColorFromName = (name?: string) => {
-        if (!name) return 'bg-primary';
+        if (!name) return '#9B8FD8'; // primary
         const colors = [
-            'bg-primary',
-            'bg-sage',
-            'bg-amber',
-            'bg-soft-blue',
-            'bg-primary-light',
+            '#9B8FD8', // primary
+            '#8FBC8B', // sage
+            '#E6B17E', // amber
+            '#89B4D4', // soft-blue
+            '#C4BBE8', // primary-light
         ];
         const index = name.charCodeAt(0) % colors.length;
         return colors[index];
@@ -79,9 +79,9 @@ export function Avatar({
         flex items-center justify-center
         rounded-full font-medium text-white
         ${sizeClasses[size]}
-        ${getColorFromName(name)}
         ${className}
       `}
+            style={{ backgroundColor: getColorFromName(name) }}
         >
             {initials}
         </div>

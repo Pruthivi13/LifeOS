@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { SearchInput, Avatar, IconButton, NotificationButton } from '@/components/ui';
 
 interface HeaderProps {
@@ -24,7 +25,14 @@ export function Header({
                     <div className="flex items-center justify-between gap-8">
                         {/* Logo */}
                         <div className="flex-shrink-0">
-                            <Link href="/">
+                            <Link href="/" className="flex items-center gap-1">
+                                <Image
+                                    src="/logo.png"
+                                    alt="LifeOS Logo"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full"
+                                />
                                 <h1 className="text-xl font-semibold text-foreground tracking-tight cursor-pointer">
                                     LifeOS
                                 </h1>

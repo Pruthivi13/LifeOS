@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Button, Input } from '@/components/ui';
@@ -53,7 +54,16 @@ export default function RegisterPage() {
                 className="w-full max-w-md"
             >
                 <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold tracking-tight mb-2">Join LifeOS</h1>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <Image
+                            src="/logo.png"
+                            alt="LifeOS Logo"
+                            width={48}
+                            height={48}
+                            className="rounded-full"
+                        />
+                        <h1 className="text-4xl font-bold tracking-tight">Join LifeOS</h1>
+                    </div>
                     <p className="text-muted-foreground">Start organizing your digital life today.</p>
                 </div>
 

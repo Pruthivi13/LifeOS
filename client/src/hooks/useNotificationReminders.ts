@@ -72,8 +72,7 @@ export function useNotificationReminders({
                 showNotification('💧 Hydration Reminder', {
                     body: 'Time to drink some water! Stay hydrated for better productivity.',
                     tag: 'hydration-reminder',
-                    renotify: true,
-                });
+                } as NotificationOptions);
             }, hydrationIntervalMinutes * 60 * 1000);
         };
 

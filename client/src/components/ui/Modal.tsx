@@ -46,7 +46,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             className="w-full max-w-md pointer-events-auto"
                         >
-                            <div className="glass-card rounded-2xl border border-white/20 shadow-2xl overflow-hidden bg-background/95 backdrop-blur-md">
+                            <div className="glass-card rounded-2xl border border-white/20 shadow-2xl bg-background/95 backdrop-blur-md">
                                 <div className="flex items-center justify-between p-4 border-b border-foreground/5">
                                     <h3 className="text-lg font-semibold pl-2">{title}</h3>
                                     <IconButton

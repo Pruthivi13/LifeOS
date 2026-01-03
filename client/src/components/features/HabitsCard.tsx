@@ -1,7 +1,7 @@
 'use client';
 
 
-import { MoreHorizontal, Plus, ListChecks } from 'lucide-react';
+import { MoreHorizontal, Plus, ListChecks, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, IconButton, Button, Dropdown } from '@/components/ui';
 import { Habit } from '@/types';
@@ -11,9 +11,10 @@ interface HabitsCardProps {
     onCompleteHabit?: (habitId: string, date: Date) => void;
     onAddHabit?: () => void;
     onEditHabit?: (habit: Habit) => void;
+    onDeleteHabit?: (habitId: string) => void;
 }
 
-export function HabitsCard({ habits, onCompleteHabit, onAddHabit, onEditHabit }: HabitsCardProps) {
+export function HabitsCard({ habits, onCompleteHabit, onAddHabit, onEditHabit, onDeleteHabit }: HabitsCardProps) {
     // Get the last 7 days for streak display
     const getWeekDays = () => {
         const days = [];
@@ -71,13 +72,22 @@ export function HabitsCard({ habits, onCompleteHabit, onAddHabit, onEditHabit }:
                         {/* Habit Name and Actions */}
                         <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-foreground">{habit.name}</p>
-                            <IconButton
-                                icon={<MoreHorizontal className="w-4 h-4" />}
-                                label="Edit habit"
-                                size="sm"
-                                onClick={() => onEditHabit?.(habit)}
-                                className="md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                            />
+                            <div className="flex items-center gap-1">
+                                <IconButton
+                                    icon={<MoreHorizontal className="w-4 h-4" />}
+                                    label="Edit habit"
+                                    size="sm"
+                                    onClick={() => onEditHabit?.(habit)}
+                                    className="md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                                />
+                                <button
+                                    onClick={() => onDeleteHabit?.(habit._id)}
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-red-500 hover:bg-red-500/10 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                                    title="Delete habit"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Streak Bar */}

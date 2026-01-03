@@ -1,42 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Button, Input, Card } from '@/components/ui';
+import { Button, Input, OTPInput, ResendTimer, LoadingSpinner } from '@/components/ui';
 import api from '@/lib/api';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
+
+type Step = 'email' | 'otp';
 
 export default function LoginPage() {
+    const [step, setStep] = useState<Step>('email');
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [otpError, setOtpError] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSendOTP = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
 
         try {
-            const res = await api.post('/api/auth/login', {
-                email,
-                password,
-            });
-
-            login(res.data, res.data.token);
-            router.push('/');
+            await api.post('/api/auth/send-login-otp', { email });
+            setStep('otp');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to login');
+            setError(err.response?.data?.message || 'Failed to send code');
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleVerifyOTP = useCallback(async (otp: string) => {
+        setError('');
+        setOtpError(false);
+        setLoading(true);
+
+        try {
+            const res = await api.post('/api/auth/verify-login-otp', { email, otp });
+            login(res.data, res.data.token);
+            router.push('/');
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Invalid code');
+            setOtpError(true);
+        } finally {
+            setLoading(false);
+        }
+    }, [email, login, router]);
+
+    const handleResendOTP = async () => {
+        setError('');
+        try {
+            await api.post('/api/auth/send-login-otp', { email });
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Failed to resend code');
+        }
+    };
+
+    const handleBack = () => {
+        setStep('email');
+        setError('');
+        setOtpError(false);
     };
 
     return (
@@ -68,65 +97,108 @@ export default function LoginPage() {
                 </div>
 
                 <div className="glass-card rounded-2xl p-8 border border-white/20 shadow-xl backdrop-blur-md">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
-                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 ml-1">Email</label>
-                                <Input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-1.5 ml-1">Password</label>
-                                <div className="relative">
-                                    <Input
-                                        type={showPassword ? 'text' : 'password'}
-                                        placeholder="••••••••"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        required
-                                        className="w-full pr-10"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                                    >
-                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                    </button>
+                    <AnimatePresence mode="wait">
+                        {step === 'email' ? (
+                            <motion.form
+                                key="email-step"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                onSubmit={handleSendOTP}
+                                className="space-y-6"
+                            >
+                                <div className="text-center mb-4">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <Mail className="w-8 h-8 text-primary" />
+                                    </div>
+                                    <h2 className="text-xl font-semibold">Sign in with Email</h2>
+                                    <p className="text-sm text-muted-foreground mt-1">We'll send you a verification code</p>
                                 </div>
-                            </div>
-                        </div>
 
-                        <Button
-                            type="submit"
-                            className="w-full"
-                            size="lg"
-                            disabled={loading}
-                        >
-                            {loading ? 'Signing in...' : 'Sign In'}
-                        </Button>
-                    </form>
+                                {error && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                                        {error}
+                                    </div>
+                                )}
 
-                    <div className="mt-4 text-center">
-                        <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
-                            Forgot your password?
-                        </Link>
-                    </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1.5 ml-1">Email</label>
+                                    <Input
+                                        type="email"
+                                        placeholder="your@email.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        className="w-full"
+                                    />
+                                </div>
 
-                    <div className="mt-4 text-center text-sm text-muted-foreground">
+                                <Button
+                                    type="submit"
+                                    className="w-full"
+                                    size="lg"
+                                    disabled={loading || !email}
+                                >
+                                    {loading ? (
+                                        <span className="flex items-center gap-2">
+                                            <LoadingSpinner size="sm" />
+                                            Sending Code...
+                                        </span>
+                                    ) : (
+                                        'Continue'
+                                    )}
+                                </Button>
+                            </motion.form>
+                        ) : (
+                            <motion.div
+                                key="otp-step"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="space-y-6"
+                            >
+                                <button
+                                    onClick={handleBack}
+                                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Back
+                                </button>
+
+                                <div className="text-center">
+                                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                        <CheckCircle className="w-8 h-8 text-primary" />
+                                    </div>
+                                    <h2 className="text-xl font-semibold">Check your email</h2>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        We sent a code to <span className="font-medium text-foreground">{email}</span>
+                                    </p>
+                                </div>
+
+                                {error && (
+                                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <OTPInput
+                                    onComplete={handleVerifyOTP}
+                                    disabled={loading}
+                                    error={otpError}
+                                />
+
+                                {loading && (
+                                    <div className="flex justify-center">
+                                        <LoadingSpinner size="md" className="text-primary" />
+                                    </div>
+                                )}
+
+                                <ResendTimer seconds={60} onResend={handleResendOTP} disabled={loading} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    <div className="mt-6 text-center text-sm text-muted-foreground">
                         Don't have an account?{' '}
                         <Link href="/register" className="text-primary hover:underline font-medium">
                             Create one

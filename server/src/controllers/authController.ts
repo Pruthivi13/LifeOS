@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import User from '../models/User';
-import { sendOTPEmail } from '../utils/emailService';
+import { sendOTPEmail, sendLoginOTPEmail, sendRegistrationOTPEmail } from '../utils/emailService';
 
 // Generate JWT
 const generateToken = (id: string) => {
@@ -230,6 +230,232 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         res.json({
             success: true,
             message: 'Password reset successful',
+            token: generateToken(user.id),
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ============================================
+// OTP-BASED LOGIN (No Password Required)
+// ============================================
+
+// @desc    Send login OTP to existing user
+// @route   POST /api/auth/send-login-otp
+// @access  Public
+export const sendLoginOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            res.status(400).json({ message: 'Email is required' });
+            return;
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            res.status(404).json({ message: 'No account found with this email' });
+            return;
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash OTP before storing
+        user.loginOTP = crypto
+            .createHash('sha256')
+            .update(otp)
+            .digest('hex');
+
+        // Set expire to 10 minutes
+        user.loginOTPExpire = new Date(Date.now() + 10 * 60 * 1000);
+
+        await user.save();
+
+        // Send OTP via email
+        try {
+            await sendLoginOTPEmail(email, otp);
+            res.json({
+                success: true,
+                message: 'Login code sent to your email',
+            });
+        } catch (emailError: any) {
+            console.error('Email sending failed:', emailError.message || emailError);
+            user.loginOTP = undefined;
+            user.loginOTPExpire = undefined;
+            await user.save();
+            res.status(500).json({ message: 'Failed to send email. Please try again.' });
+        }
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Verify login OTP and authenticate
+// @route   POST /api/auth/verify-login-otp
+// @access  Public
+export const verifyLoginOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            res.status(400).json({ message: 'Email and OTP are required' });
+            return;
+        }
+
+        // Hash OTP to compare
+        const hashedOTP = crypto
+            .createHash('sha256')
+            .update(otp)
+            .digest('hex');
+
+        const user = await User.findOne({
+            email: email.toLowerCase(),
+            loginOTP: hashedOTP,
+            loginOTPExpire: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            res.status(400).json({ message: 'Invalid or expired code' });
+            return;
+        }
+
+        // Clear OTP fields
+        user.loginOTP = undefined;
+        user.loginOTPExpire = undefined;
+        await user.save();
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
+            token: generateToken(user.id),
+        });
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ============================================
+// OTP-BASED REGISTRATION (No Password Required)
+// ============================================
+
+// Temporary storage for pending registrations (in production, use Redis)
+const pendingRegistrations = new Map<string, { name: string; email: string; otp: string; expires: Date }>();
+
+// @desc    Send registration OTP to new user
+// @route   POST /api/auth/send-register-otp
+// @access  Public
+export const sendRegisterOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { name, email } = req.body;
+
+        if (!name || !email) {
+            res.status(400).json({ message: 'Name and email are required' });
+            return;
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email: email.toLowerCase() });
+        if (existingUser) {
+            res.status(400).json({ message: 'An account with this email already exists' });
+            return;
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Hash OTP before storing
+        const hashedOTP = crypto
+            .createHash('sha256')
+            .update(otp)
+            .digest('hex');
+
+        // Store pending registration
+        pendingRegistrations.set(email.toLowerCase(), {
+            name,
+            email: email.toLowerCase(),
+            otp: hashedOTP,
+            expires: new Date(Date.now() + 10 * 60 * 1000),
+        });
+
+        // Clean up expired entries
+        for (const [key, value] of pendingRegistrations) {
+            if (value.expires < new Date()) {
+                pendingRegistrations.delete(key);
+            }
+        }
+
+        // Send OTP via email
+        try {
+            await sendRegistrationOTPEmail(email, otp, name);
+            res.json({
+                success: true,
+                message: 'Verification code sent to your email',
+            });
+        } catch (emailError: any) {
+            console.error('Email sending failed:', emailError.message || emailError);
+            pendingRegistrations.delete(email.toLowerCase());
+            res.status(500).json({ message: 'Failed to send email. Please try again.' });
+        }
+    } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Verify OTP and create account
+// @route   POST /api/auth/verify-register-otp
+// @access  Public
+export const verifyRegisterOTP = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            res.status(400).json({ message: 'Email and OTP are required' });
+            return;
+        }
+
+        const pending = pendingRegistrations.get(email.toLowerCase());
+
+        if (!pending) {
+            res.status(400).json({ message: 'No pending registration found. Please start over.' });
+            return;
+        }
+
+        if (pending.expires < new Date()) {
+            pendingRegistrations.delete(email.toLowerCase());
+            res.status(400).json({ message: 'Verification code expired. Please request a new one.' });
+            return;
+        }
+
+        // Hash OTP to compare
+        const hashedOTP = crypto
+            .createHash('sha256')
+            .update(otp)
+            .digest('hex');
+
+        if (pending.otp !== hashedOTP) {
+            res.status(400).json({ message: 'Invalid verification code' });
+            return;
+        }
+
+        // Create user (no password needed)
+        const user = await User.create({
+            name: pending.name,
+            email: pending.email,
+        });
+
+        // Clean up
+        pendingRegistrations.delete(email.toLowerCase());
+
+        res.status(201).json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
             token: generateToken(user.id),
         });
     } catch (error: any) {

@@ -14,17 +14,21 @@ import {
   AddTaskModal,
   AddHabitModal,
   EditHabitModal,
-  EditTaskModal
+  EditTaskModal,
+  OnboardingTutorial
 } from '@/components/features';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
+import { useOnboarding } from '@/context/OnboardingContext';
 import { Task, Habit, MoodEntry } from '@/types';
 import { getMoodLabel, weeklyInsight } from '@/lib/mockData';
+import { sampleTasks, sampleHabits } from '@/lib/sampleData';
 import { useNotificationReminders } from '@/hooks/useNotificationReminders';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const { user, token, isLoading: authLoading } = useAuth();
+  const { isFirstTimeUser } = useOnboarding();
   const router = useRouter();
 
   // State
@@ -54,6 +58,43 @@ export default function Home() {
       fetchDashboardData();
     }
   }, [user, token]);
+
+  // Create sample data for first-time users
+  useEffect(() => {
+    const createSampleData = async () => {
+      if (user && token && isFirstTimeUser) {
+        const hasCreatedSampleData = localStorage.getItem('lifeos-sample-data-created');
+        if (!hasCreatedSampleData) {
+          // Set flag IMMEDIATELY to prevent Strict Mode duplicate calls
+          localStorage.setItem('lifeos-sample-data-created', 'true');
+          try {
+            // Create sample tasks
+            for (const task of sampleTasks) {
+              await api.post('/api/tasks', {
+                ...task,
+                dueDate: new Date()
+              });
+            }
+            // Create sample habits
+            for (const habit of sampleHabits) {
+              await api.post('/api/habits', {
+                name: habit.name,
+                icon: habit.icon,
+                frequency: habit.frequency
+              });
+            }
+            // Refresh data
+            fetchDashboardData();
+          } catch (error) {
+            console.error('Failed to create sample data:', error);
+            // Remove flag if creation failed so user can retry
+            localStorage.removeItem('lifeos-sample-data-created');
+          }
+        }
+      }
+    };
+    createSampleData();
+  }, [user, token, isFirstTimeUser]);
 
   const fetchDashboardData = async () => {
     try {
@@ -295,6 +336,7 @@ export default function Home() {
             onToggleTask={handleTaskToggle}
             onAddTask={() => setActiveModal('task')}
             onEditTask={openEditTask}
+            onDeleteTask={handleDeleteTask}
           />
 
           <HabitsCard
@@ -302,6 +344,7 @@ export default function Home() {
             onCompleteHabit={handleHabitComplete}
             onAddHabit={() => setActiveModal('habit')}
             onEditHabit={openEditHabit}
+            onDeleteHabit={handleDeleteHabit}
           />
 
           <div className="md:col-span-1">
@@ -364,6 +407,7 @@ export default function Home() {
         task={selectedTask}
         loading={modalLoading}
       />
+      <OnboardingTutorial />
     </>
   );
 }

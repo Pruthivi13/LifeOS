@@ -2,7 +2,18 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { registerUser, loginUser, getMe, updateProfile, forgotPassword, resetPassword } from '../controllers/authController';
+import {
+    registerUser,
+    loginUser,
+    getMe,
+    updateProfile,
+    forgotPassword,
+    resetPassword,
+    sendLoginOTP,
+    verifyLoginOTP,
+    sendRegisterOTP,
+    verifyRegisterOTP
+} from '../controllers/authController';
 import { protect } from '../middleware/auth';
 
 const router = express.Router();
@@ -40,11 +51,22 @@ const upload = multer({
     },
 });
 
+// Legacy password-based routes (keeping for backwards compatibility)
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+
+// Protected routes
 router.get('/me', protect, getMe);
 router.put('/profile', protect, upload.single('avatar'), updateProfile);
+
+// Password reset
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+
+// OTP-based authentication (passwordless)
+router.post('/send-login-otp', sendLoginOTP);
+router.post('/verify-login-otp', verifyLoginOTP);
+router.post('/send-register-otp', sendRegisterOTP);
+router.post('/verify-register-otp', verifyRegisterOTP);
 
 export default router;

@@ -69,8 +69,19 @@ export function useNotificationReminders({
 
             // Set up new interval
             hydrationIntervalRef.current = setInterval(() => {
-                showNotification('💧 Hydration Reminder', {
-                    body: 'Time to drink some water! Stay hydrated for better productivity.',
+                // Get random hydration message for variety
+                const messages = [
+                    { title: '💧 Time for Water!', body: 'Stay refreshed! A glass of water boosts your energy and focus.' },
+                    { title: '💧 Hydration Check', body: 'Your body needs water to function at its best. Take a sip!' },
+                    { title: '💧 Water Break!', body: 'Pause and hydrate. Your future self will thank you!' },
+                    { title: '💧 Drink Up!', body: 'Staying hydrated helps you stay productive. Grab that water!' },
+                    { title: '💧 H2O Time', body: 'Regular hydration = better concentration. Time for a refill!' },
+                    { title: '💧 Refresh Yourself', body: 'A quick water break can help reset your focus. Stay hydrated!' }
+                ];
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+                showNotification(randomMessage.title, {
+                    body: randomMessage.body,
                     tag: 'hydration-reminder',
                 } as NotificationOptions);
             }, hydrationIntervalMinutes * 60 * 1000);

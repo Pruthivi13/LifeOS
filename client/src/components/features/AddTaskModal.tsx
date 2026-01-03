@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Modal, Input, Button } from '@/components/ui';
+import { Modal, Button, DatePicker } from '@/components/ui';
 import { Priority, Category } from '@/types';
 import { Calendar, Flag, Tag, ChevronDown } from 'lucide-react';
 
@@ -37,13 +37,13 @@ export function AddTaskModal({ isOpen, onClose, onAdd, loading }: AddTaskModalPr
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium mb-1.5 ml-1">What needs to be done?</label>
-                    <Input
+                    <input
                         placeholder="e.g., Complete research paper"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         required
                         autoFocus
-                        className="w-full"
+                        className="w-full h-10 px-3 rounded-xl bg-background-secondary border border-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm"
                     />
                 </div>
 
@@ -90,10 +90,9 @@ export function AddTaskModal({ isOpen, onClose, onAdd, loading }: AddTaskModalPr
                     <label className="block text-sm font-medium mb-1.5 ml-1 flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5" /> Due Date
                     </label>
-                    <Input
-                        type="date"
+                    <DatePicker
                         value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
+                        onChange={setDueDate}
                         className="w-full"
                     />
                 </div>

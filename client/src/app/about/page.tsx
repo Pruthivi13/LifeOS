@@ -5,7 +5,7 @@ import { Button, Card } from '@/components/ui';
 import { Header, DashboardLayout } from '@/components/layout';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
-import { ArrowLeft, CheckCircle2, BarChart2, Smile, Zap, Droplets, Palette, Activity, Bell, Smartphone } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, BarChart2, Smile, Zap, Droplets, Palette, Activity, Bell, Smartphone, KeyRound, Loader2, Calendar } from 'lucide-react';
 import {
     TasksCard,
     HabitsCard,
@@ -61,6 +61,21 @@ export default function AboutPage() {
             icon: <Palette className="w-6 h-6 text-amber-400" />,
             title: "Dark/Light Mode",
             desc: "Beautiful theming that adapts to your preference. Calm, distraction-free interface for focused productivity."
+        },
+        {
+            icon: <KeyRound className="w-6 h-6 text-emerald-400" />,
+            title: "Passwordless Login",
+            desc: "Secure OTP-based authentication. No passwords to remember—just verify with a code sent to your email."
+        },
+        {
+            icon: <Loader2 className="w-6 h-6 text-sky-400" />,
+            title: "Loading Animations",
+            desc: "Smooth loading spinners, skeleton loaders, and animated transitions for a polished experience."
+        },
+        {
+            icon: <Calendar className="w-6 h-6 text-rose-400" />,
+            title: "Custom Date Picker",
+            desc: "Beautiful themed calendar picker that matches the app's aesthetic with month navigation."
         }
     ];
 
@@ -128,7 +143,7 @@ export default function AboutPage() {
 
                     {/* Version Info */}
                     <div className="text-center text-sm text-foreground-muted pt-8 pb-4 space-y-2">
-                        <p>Version 2.0.0 • Dec 2025</p>
+                        <p>Version 3.0.0 • Jan 2026</p>
                         <a href="/feedback" className="text-primary hover:underline">
                             Send Feedback →
                         </a>

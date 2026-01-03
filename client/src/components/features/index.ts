@@ -9,3 +9,4 @@ export { AddTaskModal } from './AddTaskModal';
 export { AddHabitModal } from './AddHabitModal';
 export { EditHabitModal } from './EditHabitModal';
 export { EditTaskModal } from './EditTaskModal';
+export { OnboardingTutorial } from './OnboardingTutorial';

@@ -59,6 +59,61 @@ export const sendOTPEmail = async (email: string, otp: string): Promise<void> =>
     });
 };
 
+export const sendLoginOTPEmail = async (email: string, otp: string): Promise<void> => {
+    const html = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 28px;">LifeOS</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Sign In Request</p>
+            </div>
+            <div style="background: #1a1a2e; padding: 40px 30px; border-radius: 0 0 16px 16px; color: #e0e0e0;">
+                <p style="font-size: 16px; margin-bottom: 20px;">Use this code to sign in to your LifeOS account:</p>
+                <div style="background: #16213e; padding: 25px; border-radius: 12px; text-align: center; margin: 30px 0;">
+                    <span style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #667eea;">${otp}</span>
+                </div>
+                <p style="font-size: 14px; color: #888; margin-top: 20px;">This code is valid for <strong>10 minutes</strong>.</p>
+                <p style="font-size: 14px; color: #888;">If you didn't request this, someone may be trying to access your account.</p>
+                <hr style="border: none; border-top: 1px solid #333; margin: 30px 0;">
+                <p style="font-size: 12px; color: #666; text-align: center;">© ${new Date().getFullYear()} LifeOS. All rights reserved.</p>
+            </div>
+        </div>
+    `;
+
+    await sendEmail({
+        to: email,
+        subject: 'LifeOS - Your Sign In Code',
+        html,
+    });
+};
+
+export const sendRegistrationOTPEmail = async (email: string, otp: string, name: string): Promise<void> => {
+    const html = `
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to LifeOS! 🎉</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Verify Your Email</p>
+            </div>
+            <div style="background: #1a1a2e; padding: 40px 30px; border-radius: 0 0 16px 16px; color: #e0e0e0;">
+                <p style="font-size: 16px; margin-bottom: 20px;">Hi ${name}! 👋</p>
+                <p style="font-size: 16px; margin-bottom: 20px;">Use this code to complete your registration:</p>
+                <div style="background: #16213e; padding: 25px; border-radius: 12px; text-align: center; margin: 30px 0;">
+                    <span style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #667eea;">${otp}</span>
+                </div>
+                <p style="font-size: 14px; color: #888; margin-top: 20px;">This code is valid for <strong>10 minutes</strong>.</p>
+                <p style="font-size: 14px; color: #888;">If you didn't create an account, please ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #333; margin: 30px 0;">
+                <p style="font-size: 12px; color: #666; text-align: center;">© ${new Date().getFullYear()} LifeOS. All rights reserved.</p>
+            </div>
+        </div>
+    `;
+
+    await sendEmail({
+        to: email,
+        subject: 'LifeOS - Verify Your Email',
+        html,
+    });
+};
+
 export const sendFeedbackEmail = async (
     name: string,
     email: string,

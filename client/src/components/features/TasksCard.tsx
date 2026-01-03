@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, MoreHorizontal, CheckCircle, ListTodo, Pencil } from 'lucide-react';
+import { Plus, MoreHorizontal, CheckCircle, ListTodo, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardHeader, Checkbox, Button, IconButton, Dropdown } from '@/components/ui';
 import { Task, Priority } from '@/types';
@@ -11,6 +11,7 @@ interface TasksCardProps {
     onToggleTask?: (taskId: string) => void;
     onAddTask?: () => void;
     onEditTask?: (task: Task) => void;
+    onDeleteTask?: (taskId: string) => void;
 }
 
 const priorityLabels: Record<Priority, string> = {
@@ -19,7 +20,7 @@ const priorityLabels: Record<Priority, string> = {
     low: 'Low',
 };
 
-export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask }: TasksCardProps) {
+export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask, onDeleteTask }: TasksCardProps) {
     // Removed local state to rely on parent props
     const handleToggle = (taskId: string) => {
         onToggleTask?.(taskId);
@@ -83,13 +84,20 @@ export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask }: TasksC
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                                 <button
                                     onClick={() => onEditTask?.(task)}
-                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 transition-all"
                                     title="Edit task"
                                 >
                                     <Pencil className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => onDeleteTask?.(task._id)}
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all"
+                                    title="Delete task"
+                                >
+                                    <Trash2 className="w-4 h-4" />
                                 </button>
                                 <span className={`priority-tag priority-tag--${task.priority}`}>
                                     {priorityLabels[task.priority]}

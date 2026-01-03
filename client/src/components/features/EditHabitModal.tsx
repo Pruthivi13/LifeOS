@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Input, Button } from '@/components/ui';
 import { Habit, Frequency } from '@/types';
-import { RefreshCw, Trash2 } from 'lucide-react';
+import { RefreshCw, Trash2, Check } from 'lucide-react';
 
 interface EditHabitModalProps {
     isOpen: boolean;
@@ -82,8 +82,8 @@ export function EditHabitModal({ isOpen, onClose, onEdit, onDelete, habit, loadi
                         <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? 'Saving...' : 'Save Changes'}
+                        <Button type="submit" disabled={loading} className="px-6">
+                            {loading ? 'Saving...' : <Check className="w-5 h-5" />}
                         </Button>
                     </div>
                 </div>

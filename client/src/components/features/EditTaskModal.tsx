@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, DatePicker } from '@/components/ui';
 import { Priority, Category, Task } from '@/types';
-import { Calendar, Flag, Tag, ChevronDown, Trash2 } from 'lucide-react';
+import { Calendar, Flag, Tag, ChevronDown, Trash2, Check } from 'lucide-react';
 
 interface EditTaskModalProps {
     isOpen: boolean;
@@ -130,8 +130,8 @@ export function EditTaskModal({ isOpen, onClose, onSave, onDelete, task, loading
                         <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? 'Saving...' : 'Save Changes'}
+                        <Button type="submit" disabled={loading} className="px-6">
+                            {loading ? 'Saving...' : <Check className="w-5 h-5" />}
                         </Button>
                     </div>
                 </div>

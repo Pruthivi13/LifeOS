@@ -73,15 +73,21 @@ export function DatePicker({ value, onChange, className = '' }: DatePickerProps)
     };
 
     const handleSelectDate = (day: number) => {
-        const newDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const formattedDate = newDate.toISOString().split('T')[0];
+        // Create date object but avoid timezone shifts when formatting
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth() + 1; // 1-based for string
+        const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
         onChange(formattedDate);
         setIsOpen(false);
     };
 
     const handleToday = () => {
         const today = new Date();
-        const formattedDate = today.toISOString().split('T')[0];
+        const year = today.getFullYear();
+        const month = today.getMonth() + 1;
+        const day = today.getDate();
+        const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+
         onChange(formattedDate);
         setCurrentMonth(today);
         setIsOpen(false);

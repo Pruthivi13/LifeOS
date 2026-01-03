@@ -17,6 +17,7 @@ import {
   EditTaskModal,
   OnboardingTutorial
 } from '@/components/features';
+import { LoadingOverlay } from '@/components/ui';
 import { useTheme } from '@/context/ThemeContext';
 import { useAuth } from '@/context/AuthContext';
 import { useOnboarding } from '@/context/OnboardingContext';
@@ -314,7 +315,7 @@ export default function Home() {
   else if (habitStreak > 3) currentInsight = "Your consistency is inspiring!";
 
   if (authLoading || (!user && loading)) {
-    return <div className="min-h-screen flex items-center justify-center">Loading LifeOS...</div>;
+    return <LoadingOverlay message="Loading LifeOS..." />;
   }
 
   return (

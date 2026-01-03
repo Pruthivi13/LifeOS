@@ -73,7 +73,10 @@ export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask, onDelete
                                     checked={task.completed}
                                     onChange={() => handleToggle(task._id)}
                                 />
-                                <div className="flex-1 min-w-0">
+                                <div
+                                    className="flex-1 min-w-0 cursor-pointer"
+                                    onClick={() => onEditTask?.(task)}
+                                >
                                     <p className={`text-sm font-medium truncate transition-all ${task.completed ? 'text-foreground-muted line-through' : 'text-foreground'
                                         }`}>
                                         {task.title}
@@ -87,14 +90,14 @@ export function TasksCard({ tasks, onToggleTask, onAddTask, onEditTask, onDelete
                             <div className="flex items-center gap-1">
                                 <button
                                     onClick={() => onEditTask?.(task)}
-                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-primary hover:bg-primary/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-primary hover:bg-primary/10 opacity-0 group-hover:opacity-100 transition-all hidden md:block"
                                     title="Edit task"
                                 >
                                     <Pencil className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => onDeleteTask?.(task._id)}
-                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-red-500 hover:bg-red-500/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
+                                    className="p-1.5 rounded-lg text-foreground-muted hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all hidden md:block"
                                     title="Delete task"
                                 >
                                     <Trash2 className="w-4 h-4" />

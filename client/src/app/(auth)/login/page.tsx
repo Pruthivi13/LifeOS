@@ -37,6 +37,8 @@ export default function LoginPage() {
     };
 
     const handleVerifyOTP = useCallback(async (otp: string) => {
+        if (loading) return; // Prevent double submission
+
         setError('');
         setOtpError(false);
         setLoading(true);
@@ -45,13 +47,14 @@ export default function LoginPage() {
             const res = await api.post('/api/auth/verify-login-otp', { email, otp });
             login(res.data, res.data.token);
             router.push('/');
+            // Don't set loading(false) on success to prevent flash of form before redirect
         } catch (err: any) {
+            console.error('Login error:', err);
             setError(err.response?.data?.message || 'Invalid code');
             setOtpError(true);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Only stop loading on error
         }
-    }, [email, login, router]);
+    }, [email, login, router, loading]);
 
     const handleResendOTP = async () => {
         setError('');

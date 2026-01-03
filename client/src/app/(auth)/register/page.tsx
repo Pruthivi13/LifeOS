@@ -38,6 +38,8 @@ export default function RegisterPage() {
     };
 
     const handleVerifyOTP = useCallback(async (otp: string) => {
+        if (loading) return; // Prevent double submission
+
         setError('');
         setOtpError(false);
         setLoading(true);
@@ -46,13 +48,14 @@ export default function RegisterPage() {
             const res = await api.post('/api/auth/verify-register-otp', { email, otp });
             login(res.data, res.data.token);
             router.push('/');
+            // Don't set loading(false) on success to prevent flash
         } catch (err: any) {
+            console.error('Registration error:', err);
             setError(err.response?.data?.message || 'Invalid code');
             setOtpError(true);
-        } finally {
-            setLoading(false);
+            setLoading(false); // Only stop loading on error
         }
-    }, [email, login, router]);
+    }, [email, login, router, loading]);
 
     const handleResendOTP = async () => {
         setError('');

@@ -11,13 +11,17 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify connection configuration
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log('❌ Email Service Error:', error);
-    } else {
-        console.log('✅ Email Service is ready to send messages');
-    }
-});
+try {
+    transporter.verify(function (error, success) {
+        if (error) {
+            console.error('❌ Email Service Error (Verify):', error);
+        } else {
+            console.log('✅ Email Service is ready to send messages');
+        }
+    });
+} catch (err) {
+    console.error('❌ Transporter verify crashed:', err);
+}
 
 // Your email to receive feedback
 const FEEDBACK_RECIPIENT = process.env.FEEDBACK_EMAIL || 'mail.to.pruthivi@gmail.com';
@@ -34,16 +38,26 @@ export const sendEmail = async (options: EmailOptions): Promise<void> => {
         throw new Error('Email service is not configured (missing credentials)');
     }
 
+    // Log masked credentials for debugging (DO NOT LOG ACTUAL PASSWORD)
+    console.log(`Debug: Using Email User: ${process.env.EMAIL_USER}`);
+    console.log(`Debug: Email Pass length: ${process.env.EMAIL_PASS?.length}`);
+
     try {
         console.log(`📧 Attempting to send email to: ${options.to} | Subject: ${options.subject}`);
 
-        const info = await transporter.sendMail({
+        // Add timeout to prevent hanging (increased to 30s for Vercel/Cloud)
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Email sending timed out after 30s')), 30000)
+        );
+
+        const sendPromise = transporter.sendMail({
             from: `"LifeOS" <${process.env.EMAIL_USER}>`, // sender address
             to: options.to,
             subject: options.subject,
             html: options.html,
         });
 
+        const info = (await Promise.race([sendPromise, timeoutPromise])) as any;
         console.log('✅ Email sent successfully via Nodemailer:', info.messageId);
     } catch (error) {
         console.error('❌ Failed to send email via Nodemailer:', error);

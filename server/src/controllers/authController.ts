@@ -391,13 +391,16 @@ export const sendRegisterOTP = async (req: Request, res: Response): Promise<void
 
         // Send OTP via email
         try {
+            console.log(`🚀 Controller: Calling sendRegistrationOTPEmail for ${email}`);
             await sendRegistrationOTPEmail(email, otp, name);
+
+            console.log(`✅ Registration OTP email sent to ${email}`);
             res.json({
                 success: true,
                 message: 'Verification code sent to your email',
             });
         } catch (emailError: any) {
-            console.error('Email sending failed:', emailError.message || emailError);
+            console.error('❌ Registration email sending failed:', emailError.message || emailError);
             pendingRegistrations.delete(email.toLowerCase());
             res.status(500).json({ message: 'Failed to send email. Please try again.' });
         }

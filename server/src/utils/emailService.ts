@@ -1,8 +1,22 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Initialize Resend with API key if available
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+// Initialize Nodemailer Transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
+
+// Verify connection configuration
+transporter.verify(function (error, success) {
+    if (error) {
+        console.log('❌ Email Service Error:', error);
+    } else {
+        console.log('✅ Email Service is ready to send messages');
+    }
+});
 
 // Your email to receive feedback
 const FEEDBACK_RECIPIENT = process.env.FEEDBACK_EMAIL || 'mail.to.pruthivi@gmail.com';
@@ -14,20 +28,24 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    if (!resend) {
-        console.warn('⚠️ RESEND_API_KEY is missing. Email sending is disabled.');
-        return;
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.error('❌ Cannot send email: EMAIL_USER or EMAIL_PASS is missing.');
+        throw new Error('Email service is not configured (missing credentials)');
     }
 
     try {
-        await resend.emails.send({
-            from: process.env.RESEND_FROM_EMAIL || 'LifeOS <onboarding@resend.dev>',
+        console.log(`📧 Attempting to send email to: ${options.to} | Subject: ${options.subject}`);
+
+        const info = await transporter.sendMail({
+            from: `"LifeOS" <${process.env.EMAIL_USER}>`, // sender address
             to: options.to,
             subject: options.subject,
             html: options.html,
         });
+
+        console.log('✅ Email sent successfully via Nodemailer:', info.messageId);
     } catch (error) {
-        console.error('Failed to send email:', error);
+        console.error('❌ Failed to send email via Nodemailer:', error);
         throw error;
     }
 };
@@ -87,6 +105,7 @@ export const sendLoginOTPEmail = async (email: string, otp: string): Promise<voi
 };
 
 export const sendRegistrationOTPEmail = async (email: string, otp: string, name: string): Promise<void> => {
+    console.log(`📝 Preparing registration email for ${email}`);
     const html = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 16px 16px 0 0; text-align: center;">
@@ -150,4 +169,3 @@ export const sendFeedbackEmail = async (
         html,
     });
 };
-

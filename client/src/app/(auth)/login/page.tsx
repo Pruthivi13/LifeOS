@@ -30,10 +30,14 @@ export default function LoginPage() {
     const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
     const confirmationResultRef = useRef<ConfirmationResult | null>(null);
 
-    // Setup reCAPTCHA when phone auth is selected
+    // Setup reCAPTCHA when phone auth is selected (with delay to ensure Firebase is ready)
     useEffect(() => {
         if (authMethod === 'phone' && !recaptchaVerifierRef.current) {
-            recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
+            // Add a small delay to ensure Firebase is fully initialized
+            const timer = setTimeout(() => {
+                recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
+            }, 500);
+            return () => clearTimeout(timer);
         }
     }, [authMethod]);
 
@@ -208,8 +212,8 @@ export default function LoginPage() {
                                         type="button"
                                         onClick={() => switchAuthMethod('email')}
                                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${authMethod === 'email'
-                                                ? 'bg-primary text-white shadow-md'
-                                                : 'text-muted-foreground hover:text-foreground'
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
                                         <Mail className="w-4 h-4" />
@@ -219,8 +223,8 @@ export default function LoginPage() {
                                         type="button"
                                         onClick={() => switchAuthMethod('phone')}
                                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${authMethod === 'phone'
-                                                ? 'bg-primary text-white shadow-md'
-                                                : 'text-muted-foreground hover:text-foreground'
+                                            ? 'bg-primary text-white shadow-md'
+                                            : 'text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
                                         <Phone className="w-4 h-4" />

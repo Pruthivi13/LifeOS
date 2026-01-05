@@ -1,15 +1,18 @@
-import sgMail from '@sendgrid/mail';
+import * as brevo from '@getbrevo/brevo';
 
-// Initialize SendGrid with API key
-if (process.env.SENDGRID_API_KEY) {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    console.log('✅ SendGrid Email Service initialized');
+// Initialize Brevo API
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY || '');
+
+if (process.env.BREVO_API_KEY) {
+    console.log('✅ Brevo Email Service initialized');
 } else {
-    console.error('❌ SENDGRID_API_KEY not found in environment variables');
+    console.error('❌ BREVO_API_KEY not found in environment variables');
 }
 
-// Sender email - use your verified sender email from SendGrid
+// Sender email - use your verified sender email from Brevo
 const FROM_EMAIL = process.env.FROM_EMAIL || 'mail.to.pruthivi@gmail.com';
+const FROM_NAME = 'LifeOS';
 
 // Your email to receive feedback
 const FEEDBACK_RECIPIENT = process.env.FEEDBACK_EMAIL || 'mail.to.pruthivi@gmail.com';
@@ -21,24 +24,24 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    if (!process.env.SENDGRID_API_KEY) {
-        console.error('❌ Cannot send email: SENDGRID_API_KEY is missing.');
-        throw new Error('Email service is not configured (missing SENDGRID_API_KEY)');
+    if (!process.env.BREVO_API_KEY) {
+        console.error('❌ Cannot send email: BREVO_API_KEY is missing.');
+        throw new Error('Email service is not configured (missing BREVO_API_KEY)');
     }
 
     try {
         console.log(`📧 Attempting to send email to: ${options.to} | Subject: ${options.subject}`);
 
-        await sgMail.send({
-            to: options.to,
-            from: FROM_EMAIL,
-            subject: options.subject,
-            html: options.html,
-        });
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+        sendSmtpEmail.subject = options.subject;
+        sendSmtpEmail.htmlContent = options.html;
+        sendSmtpEmail.sender = { name: FROM_NAME, email: FROM_EMAIL };
+        sendSmtpEmail.to = [{ email: options.to }];
 
-        console.log('✅ Email sent successfully via SendGrid');
+        const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+        console.log('✅ Email sent successfully via Brevo:', result.body);
     } catch (error: any) {
-        console.error('❌ Failed to send email via SendGrid:', error?.response?.body || error);
+        console.error('❌ Failed to send email via Brevo:', error?.body || error?.message || error);
         throw error;
     }
 };

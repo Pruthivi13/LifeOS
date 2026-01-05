@@ -25,7 +25,7 @@ export default function ProfilePage() {
     useEffect(() => {
         if (user) {
             setName(user.name);
-            setEmail(user.email);
+            setEmail(user.email || '');
             setSelectedAvatar(user.avatar || '');
         }
     }, [user]);

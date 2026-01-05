@@ -1,5 +1,7 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
+'use client';
+
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -11,16 +13,44 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (only if not already initialized)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = getAuth(app);
+// Lazy initialize Firebase only on client side
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+
+const getFirebaseApp = (): FirebaseApp | null => {
+    if (typeof window === 'undefined') return null; // SSR guard
+
+    if (!app) {
+        if (!firebaseConfig.apiKey) {
+            console.warn('Firebase API key not configured');
+            return null;
+        }
+        app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    }
+    return app;
+};
+
+const getFirebaseAuth = (): Auth | null => {
+    if (typeof window === 'undefined') return null; // SSR guard
+
+    if (!auth) {
+        const firebaseApp = getFirebaseApp();
+        if (firebaseApp) {
+            auth = getAuth(firebaseApp);
+        }
+    }
+    return auth;
+};
 
 // Helper to setup invisible reCAPTCHA
 export const setupRecaptcha = (buttonId: string): RecaptchaVerifier | null => {
     if (typeof window === 'undefined') return null;
 
+    const authInstance = getFirebaseAuth();
+    if (!authInstance) return null;
+
     try {
-        const recaptchaVerifier = new RecaptchaVerifier(auth, buttonId, {
+        const recaptchaVerifier = new RecaptchaVerifier(authInstance, buttonId, {
             size: 'invisible',
             callback: () => {
                 console.log('reCAPTCHA solved');
@@ -41,8 +71,13 @@ export const sendPhoneOTP = async (
     phoneNumber: string,
     recaptchaVerifier: RecaptchaVerifier
 ): Promise<ConfirmationResult | null> => {
+    const authInstance = getFirebaseAuth();
+    if (!authInstance) {
+        throw new Error('Firebase Auth not initialized');
+    }
+
     try {
-        const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+        const confirmationResult = await signInWithPhoneNumber(authInstance, phoneNumber, recaptchaVerifier);
         return confirmationResult;
     } catch (error) {
         console.error('Error sending phone OTP:', error);
@@ -52,7 +87,10 @@ export const sendPhoneOTP = async (
 
 // Get ID token from current user
 export const getFirebaseIdToken = async (): Promise<string | null> => {
-    const user = auth.currentUser;
+    const authInstance = getFirebaseAuth();
+    if (!authInstance) return null;
+
+    const user = authInstance.currentUser;
     if (!user) return null;
 
     try {
@@ -64,5 +102,5 @@ export const getFirebaseIdToken = async (): Promise<string | null> => {
     }
 };
 
-export { auth };
+export { getFirebaseAuth as auth };
 export type { RecaptchaVerifier, ConfirmationResult };

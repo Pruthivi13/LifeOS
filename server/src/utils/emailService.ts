@@ -1,27 +1,10 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, // use SSL
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-});
+// Initialize Resend with API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify connection configuration
-try {
-    transporter.verify(function (error, success) {
-        if (error) {
-            console.error('❌ Email Service Error (Verify):', error);
-        } else {
-            console.log('✅ Email Service is ready to send messages');
-        }
-    });
-} catch (err) {
-    console.error('❌ Transporter verify crashed:', err);
-}
+// Sender email - must be from a verified domain on Resend, or use onboarding@resend.dev for testing
+const FROM_EMAIL = process.env.FROM_EMAIL || 'LifeOS <onboarding@resend.dev>';
 
 // Your email to receive feedback
 const FEEDBACK_RECIPIENT = process.env.FEEDBACK_EMAIL || 'mail.to.pruthivi@gmail.com';
@@ -33,34 +16,29 @@ interface EmailOptions {
 }
 
 export const sendEmail = async (options: EmailOptions): Promise<void> => {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.error('❌ Cannot send email: EMAIL_USER or EMAIL_PASS is missing.');
-        throw new Error('Email service is not configured (missing credentials)');
+    if (!process.env.RESEND_API_KEY) {
+        console.error('❌ Cannot send email: RESEND_API_KEY is missing.');
+        throw new Error('Email service is not configured (missing RESEND_API_KEY)');
     }
-
-    // Log masked credentials for debugging (DO NOT LOG ACTUAL PASSWORD)
-    console.log(`Debug: Using Email User: ${process.env.EMAIL_USER}`);
-    console.log(`Debug: Email Pass length: ${process.env.EMAIL_PASS?.length}`);
 
     try {
         console.log(`📧 Attempting to send email to: ${options.to} | Subject: ${options.subject}`);
 
-        // Add timeout to prevent hanging (increased to 30s for Vercel/Cloud)
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Email sending timed out after 30s')), 30000)
-        );
-
-        const sendPromise = transporter.sendMail({
-            from: `"LifeOS" <${process.env.EMAIL_USER}>`, // sender address
+        const { data, error } = await resend.emails.send({
+            from: FROM_EMAIL,
             to: options.to,
             subject: options.subject,
             html: options.html,
         });
 
-        const info = (await Promise.race([sendPromise, timeoutPromise])) as any;
-        console.log('✅ Email sent successfully via Nodemailer:', info.messageId);
+        if (error) {
+            console.error('❌ Resend API error:', error);
+            throw new Error(error.message);
+        }
+
+        console.log('✅ Email sent successfully via Resend:', data?.id);
     } catch (error) {
-        console.error('❌ Failed to send email via Nodemailer:', error);
+        console.error('❌ Failed to send email via Resend:', error);
         throw error;
     }
 };

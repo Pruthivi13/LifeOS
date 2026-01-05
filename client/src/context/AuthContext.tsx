@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             name: res.data.name,
                             avatar: res.data.avatar || '',
                             email: res.data.email,
+                            phone: res.data.phone,
                             createdAt: new Date(res.data.createdAt || Date.now())
                         };
                         setUser(freshUser);
@@ -66,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             name: userData.name,
             avatar: userData.avatar || '',
             email: userData.email,
+            phone: userData.phone,
             createdAt: new Date()
         };
 
@@ -84,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     name: res.data.name,
                     avatar: res.data.avatar || '',
                     email: res.data.email,
+                    phone: res.data.phone,
                     createdAt: new Date(res.data.createdAt || Date.now())
                 };
                 setUser(normalizedUser);

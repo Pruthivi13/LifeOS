@@ -12,7 +12,9 @@ import {
     sendLoginOTP,
     verifyLoginOTP,
     sendRegisterOTP,
-    verifyRegisterOTP
+    verifyRegisterOTP,
+    phoneLogin,
+    phoneRegister
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 
@@ -68,5 +70,9 @@ router.post('/send-login-otp', sendLoginOTP);
 router.post('/verify-login-otp', verifyLoginOTP);
 router.post('/send-register-otp', sendRegisterOTP);
 router.post('/verify-register-otp', verifyRegisterOTP);
+
+// Phone-based authentication (Firebase)
+router.post('/phone-login', phoneLogin);
+router.post('/phone-register', phoneRegister);
 
 export default router;

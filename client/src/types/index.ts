@@ -16,7 +16,8 @@ export type MoodLevel = 1 | 2 | 3 | 4 | 5;
 export interface User {
   _id: string;
   name: string;
-  email: string;
+  email?: string;
+  phone?: string;
   avatar?: string;
   preferences?: {
     routineType: 'student' | 'intern' | 'hybrid';

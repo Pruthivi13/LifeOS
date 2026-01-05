@@ -12,3 +12,5 @@ export { LoadingSpinner, LoadingOverlay, LoadingDots } from './LoadingSpinner';
 export { Skeleton, SkeletonText, SkeletonAvatar, SkeletonCard, SkeletonTaskItem } from './SkeletonLoader';
 export { OTPInput, ResendTimer } from './OTPInput';
 export { DatePicker } from './DatePicker';
+export { default as PhoneInput } from './PhoneInput';
+

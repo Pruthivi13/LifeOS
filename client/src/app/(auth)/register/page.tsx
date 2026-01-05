@@ -1,28 +1,44 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Button, Input, OTPInput, ResendTimer, LoadingSpinner } from '@/components/ui';
+import { Button, Input, OTPInput, ResendTimer, LoadingSpinner, PhoneInput } from '@/components/ui';
 import api from '@/lib/api';
+import { setupRecaptcha, sendPhoneOTP, getFirebaseIdToken } from '@/lib/firebaseConfig';
+import { RecaptchaVerifier, ConfirmationResult } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UserPlus, ArrowLeft, Mail } from 'lucide-react';
+import { UserPlus, ArrowLeft, Mail, Phone } from 'lucide-react';
 
+type AuthMethod = 'email' | 'phone';
 type Step = 'info' | 'otp';
 
 export default function RegisterPage() {
+    const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
     const [step, setStep] = useState<Step>('info');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [otpError, setOtpError] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
 
-    const handleSendOTP = async (e: React.FormEvent) => {
+    // Firebase phone auth
+    const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+    const confirmationResultRef = useRef<ConfirmationResult | null>(null);
+
+    // Setup reCAPTCHA when phone auth is selected
+    useEffect(() => {
+        if (authMethod === 'phone' && !recaptchaVerifierRef.current) {
+            recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
+        }
+    }, [authMethod]);
+
+    const handleSendEmailOTP = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setLoading(true);
@@ -37,8 +53,37 @@ export default function RegisterPage() {
         }
     };
 
-    const handleVerifyOTP = useCallback(async (otp: string) => {
-        if (loading) return; // Prevent double submission
+    const handleSendPhoneOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+
+        try {
+            if (!recaptchaVerifierRef.current) {
+                recaptchaVerifierRef.current = setupRecaptcha('recaptcha-container');
+            }
+            if (!recaptchaVerifierRef.current) {
+                throw new Error('reCAPTCHA not initialized');
+            }
+
+            const result = await sendPhoneOTP(phone, recaptchaVerifierRef.current);
+            if (result) {
+                confirmationResultRef.current = result;
+                setStep('otp');
+            } else {
+                throw new Error('Failed to send OTP');
+            }
+        } catch (err: any) {
+            console.error('Phone OTP error:', err);
+            setError(err.message || 'Failed to send code. Please try again.');
+            recaptchaVerifierRef.current = null;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyEmailOTP = useCallback(async (otp: string) => {
+        if (loading) return;
 
         setError('');
         setOtpError(false);
@@ -48,21 +93,54 @@ export default function RegisterPage() {
             const res = await api.post('/api/auth/verify-register-otp', { email, otp });
             login(res.data, res.data.token);
             router.push('/');
-            // Don't set loading(false) on success to prevent flash
         } catch (err: any) {
             console.error('Registration error:', err);
             setError(err.response?.data?.message || 'Invalid code');
             setOtpError(true);
-            setLoading(false); // Only stop loading on error
+            setLoading(false);
         }
     }, [email, login, router, loading]);
 
+    const handleVerifyPhoneOTP = useCallback(async (otp: string) => {
+        if (loading || !confirmationResultRef.current) return;
+
+        setError('');
+        setOtpError(false);
+        setLoading(true);
+
+        try {
+            // Verify with Firebase
+            await confirmationResultRef.current.confirm(otp);
+
+            // Get Firebase ID token
+            const idToken = await getFirebaseIdToken();
+            if (!idToken) {
+                throw new Error('Could not get Firebase token');
+            }
+
+            // Send to our backend with name for registration
+            const res = await api.post('/api/auth/phone-register', { idToken, name });
+            login(res.data, res.data.token);
+            router.push('/');
+        } catch (err: any) {
+            console.error('Phone registration error:', err);
+            setError(err.response?.data?.message || err.message || 'Invalid code');
+            setOtpError(true);
+            setLoading(false);
+        }
+    }, [name, login, router, loading]);
+
     const handleResendOTP = async () => {
         setError('');
-        try {
-            await api.post('/api/auth/send-register-otp', { name, email });
-        } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to resend code');
+        if (authMethod === 'email') {
+            try {
+                await api.post('/api/auth/send-register-otp', { name, email });
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Failed to resend code');
+            }
+        } else {
+            recaptchaVerifierRef.current = null;
+            setStep('info');
         }
     };
 
@@ -72,8 +150,17 @@ export default function RegisterPage() {
         setOtpError(false);
     };
 
+    const switchAuthMethod = (method: AuthMethod) => {
+        setAuthMethod(method);
+        setError('');
+        setStep('info');
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+            {/* Hidden reCAPTCHA container */}
+            <div id="recaptcha-container"></div>
+
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 opacity-30 pointer-events-none">
                 <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary-sage/20 blur-[100px]" />
@@ -103,20 +190,47 @@ export default function RegisterPage() {
                 <div className="glass-card rounded-2xl p-8 border border-white/20 shadow-xl backdrop-blur-md">
                     <AnimatePresence mode="wait">
                         {step === 'info' ? (
-                            <motion.form
+                            <motion.div
                                 key="info-step"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
-                                onSubmit={handleSendOTP}
                                 className="space-y-6"
                             >
+                                {/* Auth Method Toggle */}
+                                <div className="flex gap-2 p-1 bg-muted rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => switchAuthMethod('email')}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${authMethod === 'email'
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'text-muted-foreground hover:text-foreground'
+                                            }`}
+                                    >
+                                        <Mail className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Email</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => switchAuthMethod('phone')}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg transition-all ${authMethod === 'phone'
+                                                ? 'bg-primary text-white shadow-md'
+                                                : 'text-muted-foreground hover:text-foreground'
+                                            }`}
+                                    >
+                                        <Phone className="w-4 h-4" />
+                                        <span className="text-sm font-medium">Phone</span>
+                                    </button>
+                                </div>
+
                                 <div className="text-center mb-4">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
                                         <UserPlus className="w-8 h-8 text-primary" />
                                     </div>
                                     <h2 className="text-xl font-semibold">Create your account</h2>
-                                    <p className="text-sm text-muted-foreground mt-1">No password needed - just verify your email</p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        No password needed - just verify your {authMethod}
+                                    </p>
                                 </div>
 
                                 {error && (
@@ -125,48 +239,61 @@ export default function RegisterPage() {
                                     </div>
                                 )}
 
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1.5 ml-1">Full Name</label>
-                                        <Input
-                                            type="text"
-                                            placeholder="John Doe"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            required
-                                            className="w-full"
-                                        />
-                                    </div>
+                                <form onSubmit={authMethod === 'email' ? handleSendEmailOTP : handleSendPhoneOTP}>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1.5 ml-1">Full Name</label>
+                                            <Input
+                                                type="text"
+                                                placeholder="John Doe"
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                required
+                                                className="w-full"
+                                            />
+                                        </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1.5 ml-1">Email</label>
-                                        <Input
-                                            type="email"
-                                            placeholder="your@email.com"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            required
-                                            className="w-full"
-                                        />
-                                    </div>
-                                </div>
+                                        {authMethod === 'email' ? (
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1.5 ml-1">Email</label>
+                                                <Input
+                                                    type="email"
+                                                    placeholder="your@email.com"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    required
+                                                    className="w-full"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1.5 ml-1">Phone Number</label>
+                                                <PhoneInput
+                                                    value={phone}
+                                                    onChange={setPhone}
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                        )}
 
-                                <Button
-                                    type="submit"
-                                    className="w-full"
-                                    size="lg"
-                                    disabled={loading || !name || !email}
-                                >
-                                    {loading ? (
-                                        <span className="flex items-center gap-2">
-                                            <LoadingSpinner size="sm" />
-                                            Sending Code...
-                                        </span>
-                                    ) : (
-                                        'Continue'
-                                    )}
-                                </Button>
-                            </motion.form>
+                                        <Button
+                                            type="submit"
+                                            className="w-full"
+                                            size="lg"
+                                            disabled={loading || !name || (authMethod === 'email' ? !email : phone.length < 10)}
+                                        >
+                                            {loading ? (
+                                                <span className="flex items-center gap-2">
+                                                    <LoadingSpinner size="sm" />
+                                                    Sending Code...
+                                                </span>
+                                            ) : (
+                                                'Continue'
+                                            )}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </motion.div>
                         ) : (
                             <motion.div
                                 key="otp-step"
@@ -185,11 +312,18 @@ export default function RegisterPage() {
 
                                 <div className="text-center">
                                     <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
-                                        <Mail className="w-8 h-8 text-primary" />
+                                        {authMethod === 'email' ? (
+                                            <Mail className="w-8 h-8 text-primary" />
+                                        ) : (
+                                            <Phone className="w-8 h-8 text-primary" />
+                                        )}
                                     </div>
-                                    <h2 className="text-xl font-semibold">Verify your email</h2>
+                                    <h2 className="text-xl font-semibold">Verify your {authMethod}</h2>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        We sent a code to <span className="font-medium text-foreground">{email}</span>
+                                        We sent a code to{' '}
+                                        <span className="font-medium text-foreground">
+                                            {authMethod === 'email' ? email : phone}
+                                        </span>
                                     </p>
                                 </div>
 
@@ -200,7 +334,7 @@ export default function RegisterPage() {
                                 )}
 
                                 <OTPInput
-                                    onComplete={handleVerifyOTP}
+                                    onComplete={authMethod === 'email' ? handleVerifyEmailOTP : handleVerifyPhoneOTP}
                                     disabled={loading}
                                     error={otpError}
                                 />

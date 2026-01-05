@@ -2,7 +2,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
     name: string;
-    email: string;
+    email?: string;
+    phone?: string;
     password?: string;
     avatar?: string;
     googleId?: string;
@@ -10,6 +11,8 @@ export interface IUser extends Document {
     resetPasswordExpire?: Date;
     loginOTP?: string;
     loginOTPExpire?: Date;
+    phoneOTP?: string;
+    phoneOTPExpire?: Date;
     createdAt: Date;
 }
 
@@ -21,8 +24,15 @@ const UserSchema: Schema = new Schema(
         },
         email: {
             type: String,
-            required: true,
+            required: false, // Optional since user can register with phone
             unique: true,
+            sparse: true, // Allows multiple null values for unique field
+        },
+        phone: {
+            type: String,
+            required: false,
+            unique: true,
+            sparse: true, // Allows multiple null values for unique field
         },
         password: {
             type: String,
@@ -45,6 +55,12 @@ const UserSchema: Schema = new Schema(
             type: String,
         },
         loginOTPExpire: {
+            type: Date,
+        },
+        phoneOTP: {
+            type: String,
+        },
+        phoneOTPExpire: {
             type: Date,
         },
     },

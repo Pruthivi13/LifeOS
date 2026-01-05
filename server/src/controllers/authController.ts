@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import User from '../models/User';
 import { sendOTPEmail, sendLoginOTPEmail, sendRegistrationOTPEmail } from '../utils/emailService';
+import { verifyFirebaseToken, getFirebaseUser } from '../config/firebaseAdmin';
 
 // Generate JWT
 const generateToken = (id: string) => {
@@ -458,10 +459,124 @@ export const verifyRegisterOTP = async (req: Request, res: Response): Promise<vo
             _id: user.id,
             name: user.name,
             email: user.email,
+            phone: user.phone,
             avatar: user.avatar,
             token: generateToken(user.id),
         });
     } catch (error: any) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ============================================
+// PHONE-BASED LOGIN (Firebase Phone Auth)
+// ============================================
+
+// @desc    Login with phone using Firebase ID token
+// @route   POST /api/auth/phone-login
+// @access  Public
+export const phoneLogin = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            res.status(400).json({ message: 'Firebase ID token is required' });
+            return;
+        }
+
+        // Verify Firebase token
+        const decodedToken = await verifyFirebaseToken(idToken);
+        if (!decodedToken) {
+            res.status(401).json({ message: 'Invalid or expired token' });
+            return;
+        }
+
+        // Get phone number from Firebase
+        const firebaseUser = await getFirebaseUser(decodedToken.uid);
+        if (!firebaseUser || !firebaseUser.phoneNumber) {
+            res.status(400).json({ message: 'Could not get phone number from Firebase' });
+            return;
+        }
+
+        const phone = firebaseUser.phoneNumber;
+
+        // Find or create user by phone
+        let user = await User.findOne({ phone });
+
+        if (!user) {
+            res.status(404).json({
+                message: 'No account found with this phone number',
+                needsRegistration: true,
+                phone
+            });
+            return;
+        }
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            avatar: user.avatar,
+            token: generateToken(user.id),
+        });
+    } catch (error: any) {
+        console.error('Phone login error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Register with phone using Firebase ID token
+// @route   POST /api/auth/phone-register
+// @access  Public
+export const phoneRegister = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idToken, name } = req.body;
+
+        if (!idToken || !name) {
+            res.status(400).json({ message: 'Firebase ID token and name are required' });
+            return;
+        }
+
+        // Verify Firebase token
+        const decodedToken = await verifyFirebaseToken(idToken);
+        if (!decodedToken) {
+            res.status(401).json({ message: 'Invalid or expired token' });
+            return;
+        }
+
+        // Get phone number from Firebase
+        const firebaseUser = await getFirebaseUser(decodedToken.uid);
+        if (!firebaseUser || !firebaseUser.phoneNumber) {
+            res.status(400).json({ message: 'Could not get phone number from Firebase' });
+            return;
+        }
+
+        const phone = firebaseUser.phoneNumber;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ phone });
+        if (existingUser) {
+            res.status(400).json({ message: 'An account with this phone number already exists' });
+            return;
+        }
+
+        // Create new user with phone
+        const user = await User.create({
+            name,
+            phone,
+        });
+
+        res.status(201).json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            avatar: user.avatar,
+            token: generateToken(user.id),
+        });
+    } catch (error: any) {
+        console.error('Phone registration error:', error);
         res.status(500).json({ message: error.message });
     }
 };

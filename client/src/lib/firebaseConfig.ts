@@ -42,22 +42,35 @@ const getFirebaseAuth = (): Auth | null => {
     return auth;
 };
 
-// Helper to setup invisible reCAPTCHA
+// Helper to setup reCAPTCHA (normal size for better reliability)
 export const setupRecaptcha = (buttonId: string): RecaptchaVerifier | null => {
     if (typeof window === 'undefined') return null;
 
     const authInstance = getFirebaseAuth();
-    if (!authInstance) return null;
+    if (!authInstance) {
+        console.error('Firebase Auth not available');
+        return null;
+    }
+
+    // Clear any existing reCAPTCHA
+    const container = document.getElementById(buttonId);
+    if (container) {
+        container.innerHTML = '';
+    }
 
     try {
         const recaptchaVerifier = new RecaptchaVerifier(authInstance, buttonId, {
-            size: 'invisible',
+            size: 'normal',
             callback: () => {
                 console.log('reCAPTCHA solved');
             },
             'expired-callback': () => {
                 console.log('reCAPTCHA expired');
             }
+        });
+        // Render the reCAPTCHA
+        recaptchaVerifier.render().catch((err) => {
+            console.error('reCAPTCHA render error:', err);
         });
         return recaptchaVerifier;
     } catch (error) {

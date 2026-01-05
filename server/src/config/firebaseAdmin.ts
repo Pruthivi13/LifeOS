@@ -6,11 +6,14 @@ const initializeFirebaseAdmin = () => {
         return admin.apps[0]!;
     }
 
+    // Trim all env vars to remove any trailing newlines or spaces
+    const projectId = process.env.FIREBASE_PROJECT_ID?.trim();
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
     const privateKey = process.env.FIREBASE_PRIVATE_KEY
-        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+        ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n').trim()
         : undefined;
 
-    if (!process.env.FIREBASE_PROJECT_ID || !privateKey || !process.env.FIREBASE_CLIENT_EMAIL) {
+    if (!projectId || !privateKey || !clientEmail) {
         console.warn('⚠️ Firebase Admin SDK not configured - phone auth will not work');
         return null;
     }
@@ -18,9 +21,9 @@ const initializeFirebaseAdmin = () => {
     try {
         const app = admin.initializeApp({
             credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
+                projectId: projectId,
                 privateKey: privateKey,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                clientEmail: clientEmail,
             }),
         });
         console.log('✅ Firebase Admin SDK initialized');

@@ -462,6 +462,7 @@ export const verifyRegisterOTP = async (req: Request, res: Response): Promise<vo
             phone: user.phone,
             avatar: user.avatar,
             token: generateToken(user.id),
+            isNewUser: true,
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -613,6 +614,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
 
         // Find or create user by email
         let user = await User.findOne({ email: email.toLowerCase() });
+        let isNewUser = false;
 
         if (!user) {
             // Create new user with Google data
@@ -621,6 +623,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
                 email: email.toLowerCase(),
                 avatar: photoURL || null,
             });
+            isNewUser = true;
             console.log('✅ Created new user via Google Sign-In:', email);
         } else {
             // Update avatar if user doesn't have one
@@ -637,6 +640,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
             phone: user.phone,
             avatar: user.avatar,
             token: generateToken(user.id),
+            isNewUser,
         });
     } catch (error: any) {
         console.error('Google login error:', error);

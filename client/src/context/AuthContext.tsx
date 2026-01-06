@@ -75,6 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(newToken);
         localStorage.setItem('lifeos-token', newToken);
         localStorage.setItem('lifeos-user', JSON.stringify(normalizedUser));
+
+        // Clear onboarding storage for new users to trigger tutorial
+        if (userData.isNewUser) {
+            localStorage.removeItem('lifeos-onboarding');
+        }
     };
 
     const checkAuth = async () => {

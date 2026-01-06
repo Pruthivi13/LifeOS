@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { Header, DashboardLayout } from '@/components/layout';
 import { Card, Input, Button, Avatar } from '@/components/ui';
-import { Save, ArrowLeft, LogOut, Check } from 'lucide-react';
+import { Save, ArrowLeft, LogOut, Check, Trash2, AlertTriangle } from 'lucide-react';
 import api from '@/lib/api';
 import { predefinedAvatars, getAvatarsByCategory, type PredefinedAvatar } from '@/lib/avatars';
 
@@ -20,6 +20,8 @@ export default function ProfilePage() {
     const [selectedAvatar, setSelectedAvatar] = useState<string>('');
     const [activeCategory, setActiveCategory] = useState<'male' | 'female' | 'neutral'>('male');
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     useEffect(() => {
@@ -57,6 +59,25 @@ export default function ProfilePage() {
             setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update profile' });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+        setDeleteLoading(true);
+        try {
+            await api.delete('/api/auth/delete-account', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            // Clear all local storage and redirect
+            localStorage.clear();
+            window.location.href = '/login';
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to delete account' });
+            setShowDeleteConfirm(false);
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -200,9 +221,59 @@ export default function ProfilePage() {
                             </div>
                         </form>
                     </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="p-8 border-red-500/20">
+                        <h2 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5" />
+                            Danger Zone
+                        </h2>
+                        <p className="text-sm text-muted-foreground mb-4">
+                            Permanently delete your account and all associated data. This action cannot be undone.
+                        </p>
+
+                        {!showDeleteConfirm ? (
+                            <Button
+                                variant="outline"
+                                className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                                onClick={() => setShowDeleteConfirm(true)}
+                                icon={<Trash2 className="w-4 h-4" />}
+                            >
+                                Delete My Account
+                            </Button>
+                        ) : (
+                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl space-y-4">
+                                <p className="text-sm font-medium text-red-500">
+                                    Are you absolutely sure? This will permanently delete:
+                                </p>
+                                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                                    <li>Your profile and settings</li>
+                                    <li>All your tasks</li>
+                                    <li>All your habits and streaks</li>
+                                    <li>All your mood history</li>
+                                </ul>
+                                <div className="flex gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowDeleteConfirm(false)}
+                                        disabled={deleteLoading}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        className="bg-red-500 hover:bg-red-600 text-white"
+                                        onClick={handleDeleteAccount}
+                                        disabled={deleteLoading}
+                                        icon={<Trash2 className="w-4 h-4" />}
+                                    >
+                                        {deleteLoading ? 'Deleting...' : 'Yes, Delete Everything'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </Card>
                 </div>
             </DashboardLayout>
         </>
     );
 }
-

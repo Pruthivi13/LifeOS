@@ -79,4 +79,29 @@ router.post('/phone-register', phoneRegister);
 // Google authentication (Firebase)
 router.post('/google-login', googleLogin);
 
+// Account management
+router.delete('/delete-account', protect, async (req: any, res) => {
+    try {
+        const User = require('../models/User').default;
+        const Task = require('../models/Task').default;
+        const Habit = require('../models/Habit').default;
+        const Mood = require('../models/Mood').default;
+
+        const userId = req.user.id;
+
+        // Delete all user data
+        await Promise.all([
+            Task.deleteMany({ user: userId }),
+            Habit.deleteMany({ user: userId }),
+            Mood.deleteMany({ user: userId }),
+            User.findByIdAndDelete(userId),
+        ]);
+
+        res.json({ success: true, message: 'Account deleted successfully' });
+    } catch (error: any) {
+        console.error('Delete account error:', error);
+        res.status(500).json({ message: 'Failed to delete account' });
+    }
+});
+
 export default router;

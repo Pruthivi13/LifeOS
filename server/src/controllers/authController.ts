@@ -580,3 +580,67 @@ export const phoneRegister = async (req: Request, res: Response): Promise<void> 
         res.status(500).json({ message: error.message });
     }
 };
+
+// ============================================
+// GOOGLE SIGN-IN (Firebase Google Auth)
+// ============================================
+
+// @desc    Login/Register with Google using Firebase ID token
+// @route   POST /api/auth/google-login
+// @access  Public
+export const googleLogin = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idToken, name, photoURL } = req.body;
+
+        if (!idToken) {
+            res.status(400).json({ message: 'Firebase ID token is required' });
+            return;
+        }
+
+        // Verify Firebase token
+        const decodedToken = await verifyFirebaseToken(idToken);
+        if (!decodedToken) {
+            res.status(401).json({ message: 'Invalid or expired token' });
+            return;
+        }
+
+        // Get email from decoded token
+        const email = decodedToken.email;
+        if (!email) {
+            res.status(400).json({ message: 'Could not get email from Google account' });
+            return;
+        }
+
+        // Find or create user by email
+        let user = await User.findOne({ email: email.toLowerCase() });
+
+        if (!user) {
+            // Create new user with Google data
+            user = await User.create({
+                name: name || decodedToken.name || 'User',
+                email: email.toLowerCase(),
+                avatar: photoURL || null,
+            });
+            console.log('✅ Created new user via Google Sign-In:', email);
+        } else {
+            // Update avatar if user doesn't have one
+            if (!user.avatar && photoURL) {
+                user.avatar = photoURL;
+                await user.save();
+            }
+        }
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            avatar: user.avatar,
+            token: generateToken(user.id),
+        });
+    } catch (error: any) {
+        console.error('Google login error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+

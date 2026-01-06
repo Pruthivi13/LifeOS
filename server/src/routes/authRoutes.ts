@@ -14,7 +14,8 @@ import {
     sendRegisterOTP,
     verifyRegisterOTP,
     phoneLogin,
-    phoneRegister
+    phoneRegister,
+    googleLogin
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 
@@ -74,5 +75,8 @@ router.post('/verify-register-otp', verifyRegisterOTP);
 // Phone-based authentication (Firebase)
 router.post('/phone-login', phoneLogin);
 router.post('/phone-register', phoneRegister);
+
+// Google authentication (Firebase)
+router.post('/google-login', googleLogin);
 
 export default router;

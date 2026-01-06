@@ -1,7 +1,7 @@
 'use client';
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth } from 'firebase/auth';
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult, Auth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -105,5 +105,31 @@ export const getFirebaseIdToken = async (): Promise<string | null> => {
     }
 };
 
+// Sign in with Google
+export const signInWithGoogle = async (): Promise<{ idToken: string; email: string; name: string; photoURL: string | null } | null> => {
+    const authInstance = getFirebaseAuth();
+    if (!authInstance) {
+        throw new Error('Firebase Auth not initialized');
+    }
+
+    try {
+        const provider = new GoogleAuthProvider();
+        const result = await signInWithPopup(authInstance, provider);
+        const user = result.user;
+        const idToken = await user.getIdToken();
+
+        return {
+            idToken,
+            email: user.email || '',
+            name: user.displayName || '',
+            photoURL: user.photoURL
+        };
+    } catch (error) {
+        console.error('Error signing in with Google:', error);
+        throw error;
+    }
+};
+
 export { getFirebaseAuth as auth };
 export type { RecaptchaVerifier, ConfirmationResult };
+
